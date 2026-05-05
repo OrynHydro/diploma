@@ -1,14 +1,16 @@
 import express from 'express'
-import type { Application, RequestHandler } from 'express'
-import dotenv from 'dotenv'
+import type { Application } from 'express'
 import cors from 'cors'
 import dns from "node:dns/promises";
+
 dns.setServers(["1.1.1.1"]);
 
 import usersRouter from './routes/users.js'
 import productsRouter from './routes/products.js'
+import chatsRouter from './routes/chats.js'
+import smsRouter from './routes/sms.js'
 
-import { MongoConnect } from './middleware/mongo-connect.js'
+import { MongoConnect } from './config/mongo-connect.js'
 
 const app: Application = express()
 
@@ -19,10 +21,9 @@ app.use(express.json())
 
 app.use('/users', usersRouter)
 app.use('/products', productsRouter)
-
-dotenv.config({ path: '.env.local' })
+app.use('/chats', chatsRouter)
+app.use('/sms', smsRouter)
 
 MongoConnect()
-
 
 app.listen(port, () => console.log(`Server is running on port ${port}`))

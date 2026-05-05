@@ -1,4 +1,3 @@
-import dotenv from 'dotenv'
 import mongoose from 'mongoose'
 
 export const MongoConnect = () => {
