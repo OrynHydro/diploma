@@ -1,9 +1,13 @@
 import mongoose, { Schema } from 'mongoose'
-import type { IUser } from '../interfaces/user.interface.js'
+import type { IUser } from '@shared/interfaces/user.interface.js'
 
-const UserSchema: Schema = new mongoose.Schema<IUser>(
+export interface IUserDocument extends IUser, Document {
+    
+}
+
+const UserSchema: Schema = new mongoose.Schema<IUserDocument>(
 	{
-		name: {
+		phone: {
             type: String,
             required: true,
             unique: true
@@ -16,5 +20,5 @@ const UserSchema: Schema = new mongoose.Schema<IUser>(
 	{ timestamps: true }
 )
 
-const UserModel = mongoose.model<IUser>('User', UserSchema)
+const UserModel = mongoose.model<IUserDocument>('User', UserSchema)
 export default UserModel

@@ -1,12 +1,10 @@
 import { Router } from 'express'
 import type { Request, Response } from 'express'
-import User from '../models/User.js'
+import User, { type IUserDocument } from '../models/User.js'
 import dotenv from 'dotenv'
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken'
 import type {JwtPayload} from 'jsonwebtoken'
-import type { IUser } from '../interfaces/user.interface.js';
-
 const router = Router()
 
 dotenv.config({ path: '.env.local' })
@@ -26,7 +24,6 @@ router.post('/', async (req: Request, res: Response) => {
             ...userData,
             password: hashPassword
         });
-        
 
         const dbUser = await user.save();
 
@@ -46,10 +43,13 @@ router.post('/', async (req: Request, res: Response) => {
             maxAge: 14 * 24 * 60 * 60 * 1000,
         })
 
+        
         res.status(201).json({ message: `User ${dbUser._id} created` });
-    } catch (error) {
-        res.status(500).json(error)
-        console.log(error)
+    } catch (error: any) {
+        res.status(500).json({ 
+            message: "Сталася помилка на сервері", 
+            error: error.message 
+        });
     }
 })
 
@@ -58,12 +58,12 @@ router.post('/login', async (req: Request, res: Response) => {
     try {
         const { phone, password } = req.body;
 
-        const user = await User.findOne({ phone });
+        const user = await User.findOne({ phone }) as IUserDocument | null; 
         if (!user) {
             return res.status(401).json({ message: "Invalid phone or password" });
         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, user.password!);
         if (!isMatch) {
             return res.status(401).json({ message: "Invalid phone or password" });
         }

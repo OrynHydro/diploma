@@ -16,13 +16,15 @@ const app: Application = express()
 
 const port = 5000
 
-app.use(cors())
+app.use(cors());
 app.use(express.json())
 
 app.use('/users', usersRouter)
 app.use('/products', productsRouter)
 app.use('/chats', chatsRouter)
 app.use('/sms', smsRouter)
+
+
 
 MongoConnect()
 
