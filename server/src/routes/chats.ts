@@ -1,18 +1,39 @@
 import { Router } from 'express'
 import type { Request, Response } from 'express'
 import { Chat } from '../models/Chat.js'
+import jwt from 'jsonwebtoken'
+import User from '../models/User.js'
 
 const router = Router()
 
 // get chat
-router.get('/:userId', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
     try {
-        const { userId } = req.params;
+        const accessToken = req.cookies['accessToken'];
+        const guestId = req.query.guestId as string;
+        let userId: string | null = null;
+
+        if (accessToken) {
+            try {
+                const decoded = jwt.verify(accessToken, process.env.SECRET_KEY_ACCESS as string) as { userId: string };
+                userId = decoded.userId;
+            } catch (e) {  }
+        }
+
+        if (!userId && guestId) {
+            const guest = await User.findOne({ guestId });
+            if (guest) userId = guest._id.toString();
+        }
+
+        if (!userId) {
+            return res.json({ messages: [] });
+        }
+
         const chat = await Chat.findOne({ userId });
-        
         res.json(chat ? chat.messages : []);
+
     } catch (error) {
-        res.status(500).json({ error: "Помилка завантаження історії" });
+        res.status(500).json({ message: "Ошибка загрузки чата" });
     }
 });
 

@@ -1,12 +1,18 @@
 'use client'
-import React, { FC, useState } from 'react'
+import { FC, useState } from 'react'
 import s from './Auth.module.scss'
 import { useForm } from '@tanstack/react-form'
 import { registerSchema } from '@/libs/schema/register.schema'
 import { api } from '@/api/api'
+import { useRouter } from 'next/navigation'
+import { useActions } from '@/hooks/useActions'
 
 const AuthPage: FC = () => {
     const [view, setView] = useState<'register' | 'verify'>('register')
+
+    const router = useRouter()
+
+    const { setUser } = useActions()
 
     const form = useForm({
         defaultValues: {
@@ -36,12 +42,30 @@ const AuthPage: FC = () => {
                     alert('Код не співпадає!');
                     return;
                 }
-                const { data } = await api.post('/users', {
-                    phone: value.phone,
-                    password: value.password
-                });
+                const guestId = localStorage.getItem('guestId');
+                try {
+                    const { data } = await api.post('/users', {
+                        phone: value.phone,
+                        password: value.password,
+                        ...(guestId && { guestId })
+                    });
+                    if (guestId) {
+                        localStorage.removeItem('guestId');
+                    }
 
-                console.log('Реєстрація успішна:', data);
+                    setUser({
+                        _id: data.user.id,
+                        phone: value.phone,
+                        password: value.password,
+                        isGuest: false
+                    })
+                    console.log('Реєстрація успішна:', data);
+                    setView('register');
+                    router.push('/')
+                } catch (err) {
+                    console.log(err)
+                }
+                
             }
         }
     })

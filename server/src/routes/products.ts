@@ -6,6 +6,7 @@ import { generateRecommendation, generateStandaloneQuery } from '../services/ai.
 import { z } from 'zod';
 import { Chat } from '../models/Chat.js';
 import { addMessageToChat } from '../services/chat.service.js';
+import User from '../models/User.js'
 
 const router = Router();
 
@@ -61,17 +62,36 @@ function needsRewriting(query: string): boolean {
 // search for products
 router.post('/search', async (req: Request, res: Response) => {
     try {
-        const { query, userId } = req.body;
+        const { query, userId, guestId } = req.body;
+
+         let effectiveUserId = userId;
+
+        if (!effectiveUserId && guestId) {
+            let guest = await User.findOne({ guestId });
+            if (!guest) {
+                guest = new User({ 
+                    guestId, 
+                    isGuest: true 
+                });
+                await guest.save();
+            }
+            effectiveUserId = guest._id;
+        }
+
+        if (!effectiveUserId) {
+            return res.status(400).json({ error: "Необхідно вказати ідентифікатор користувача" });
+        }
 
         // zod parser
         const result = SearchSchema.safeParse(req.body);
         if (!result.success) return res.status(400).json({ error: "Некоректний запит" });  
         
         // chat history
-        const chat = await Chat.findOne({ userId }); 
+        const chat = await Chat.findOne({ userId: effectiveUserId }); 
         const history = chat ? chat.messages.slice(-6) : [];
 
         let standaloneQuery = query;
+
 
         // rewriting query according to context 
         if (needsRewriting(query) && history.length > 0) {
@@ -99,8 +119,8 @@ router.post('/search', async (req: Request, res: Response) => {
         const answer = await generateRecommendation(query, searchResults);
 
         // adding messages to chat
-        await addMessageToChat(userId, 'user', query)
-        await addMessageToChat(userId, 'assistant', answer)
+        await addMessageToChat(effectiveUserId, 'user', query)
+        await addMessageToChat(effectiveUserId, 'assistant', answer)
 
         // another check
         if (answer.toLowerCase().includes('я не можу знайти')) {

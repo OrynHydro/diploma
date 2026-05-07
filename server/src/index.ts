@@ -2,6 +2,7 @@ import express from 'express'
 import type { Application } from 'express'
 import cors from 'cors'
 import dns from "node:dns/promises";
+import cookieParser from 'cookie-parser'
 
 dns.setServers(["1.1.1.1"]);
 
@@ -18,6 +19,7 @@ const port = 5000
 
 app.use(cors());
 app.use(express.json())
+app.use(cookieParser())
 
 app.use('/users', usersRouter)
 app.use('/products', productsRouter)
