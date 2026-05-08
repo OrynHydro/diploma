@@ -71,7 +71,8 @@ router.post('/search', async (req: Request, res: Response) => {
             if (!guest) {
                 guest = new User({ 
                     guestId, 
-                    isGuest: true 
+                    isGuest: true,
+                    phone: undefined 
                 });
                 await guest.save();
             }
@@ -96,7 +97,6 @@ router.post('/search', async (req: Request, res: Response) => {
         // rewriting query according to context 
         if (needsRewriting(query) && history.length > 0) {
              standaloneQuery = await generateStandaloneQuery(query, history);
-             console.log(`[Query Rewriting] Оригінал: "${query}" -> Переписано: "${standaloneQuery}"`);
         }
 
 
@@ -108,6 +108,7 @@ router.post('/search', async (req: Request, res: Response) => {
             return res.json({ answer: fallbackMsg, products: [] });
         }
 
+
         // vectorizing user query 
         const queryVector = await generateEmbedding(standaloneQuery);
         const searchResults = await Product.aggregate([
@@ -115,8 +116,11 @@ router.post('/search', async (req: Request, res: Response) => {
             { $project: { name: 1, price: 1, score: { $meta: "vectorSearchScore" } } }
         ]);
 
+        console.log(searchResults)
+
         // generating answer according to results
         const answer = await generateRecommendation(query, searchResults);
+
 
         // adding messages to chat
         await addMessageToChat(effectiveUserId, 'user', query)
@@ -131,7 +135,7 @@ router.post('/search', async (req: Request, res: Response) => {
         // response
         res.json({ answer, products: searchResults });
     } catch (error) {
-        res.status(500).json({ error: "Помилка" });
+        res.status(500).json(error);
         console.log(error)
     }
 });

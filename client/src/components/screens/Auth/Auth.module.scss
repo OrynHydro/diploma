@@ -1,40 +1,189 @@
+@use "sass:color";
+
+$accent: #2563eb;
+$bg: #f8fafc;
+$text: #1e293b;
+$border: #e2e8f0;
+$error-red: #dc2626;
+$error-bg: #fef2f2;
+$text-main: #1e293b;
+$border-color: #e2e8f0;
+
 .container {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: #f4f4f9;
+  min-height: calc(100vh - 74px);
+  background-color: $bg;
+  padding: 1rem;
+}
+
+.card {
+  background: white;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.tabs {
+  display: flex;
+  background: #f1f5f9;
+  
+  button {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.2s;
+
+    &.activeTab {
+      background: white;
+      color: $accent;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
 }
 
 .form {
-  background: white;
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 400px;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: $text;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  position: relative;
+  width: 100%;
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #475569;
+    margin-left: 0.2rem;
+  }
 }
 
 .input {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
+  padding: 12px 16px;
+  border: 1px solid $border-color;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background-color: #fff;
+
+  &:focus {
+    outline: none;
+    border-color: $accent;
+    box-shadow: 0 0 0 4px color.adjust($accent, $alpha: -0.9);
+  }
+
+  // Стан помилки
+  &.inputError {
+    border-color: $error-red;
+    background-color: color.adjust($error-red, $alpha: -0.98);
+
+    &:focus {
+      box-shadow: 0 0 0 4px color.adjust($error-red, $alpha: -0.9);
+    }
+  }
+}
+
+.errorHint {
+  color: $error-red;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-left: 0.2rem;
+  animation: slideDown 0.2s ease-out;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  &::before {
+    content: "⚠️";
+    font-size: 0.7rem;
+  }
+}
+
+.errorMessage {
+  background-color: $error-bg;
+  color: $error-red;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid color.adjust($error-red, $alpha: -0.8);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.info {
+  font-size: 0.875rem;
+  color: #64748b;
+  text-align: center;
 }
 
 .button {
-  padding: 10px;
-  background-color: #0070f3;
+  padding: 12px;
+  background-color: $accent;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background 0.2s;
   
   &:hover {
-    background-color: #0051b3;
+    background-color: color.adjust($accent, $lightness: -5%);
   }
+}
+
+.backBtn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  
+  &:hover {
+    color: $text;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
 }

@@ -85,12 +85,12 @@ router.post('/login', async (req: Request, res: Response) => {
 
         const user = await User.findOne({ phone }) as IUserDocument | null; 
         if (!user) {
-            return res.status(401).json({ message: "Invalid phone or password" });
+            return res.status(401).json({ message: "Неправильний телефон або пароль" });
         }
 
         const isMatch = await bcrypt.compare(password, user.password!);
         if (!isMatch) {
-            return res.status(401).json({ message: "Invalid phone or password" });
+            return res.status(401).json({ message: "Неправильний телефон або пароль" });
         }
 
         const accessToken = jwt.sign({ userId: user._id }, secretKeyAccess, {

@@ -1,0 +1,227 @@
+@use "sass:color";
+$blue-primary: #2563eb;
+$indigo-gradient: linear-gradient(90deg, #2563eb 0%, #4f46e5 100%);
+$text-main: #1f2937;
+$text-muted: #6b7280;
+$bg-white: rgba(255, 255, 255, 0.85);
+$border-color: #f3f4f6;
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  background: $bg-white;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid $border-color;
+  font-family: 'Inter', sans-serif;
+}
+
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.navWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 4.5rem;
+  gap: 2rem;
+}
+
+.logoSection {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.85;
+  }
+
+  .iconBox {
+    background: $blue-primary;
+    padding: 0.5rem;
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+  }
+
+  .logoText {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: $indigo-gradient;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.desktopNav {
+  display: none;
+  gap: 2.5rem;
+  justify-content: center;
+  flex: 1; 
+
+  @media (min-width: 768px) {
+    display: flex;
+  }
+
+  a {
+    text-decoration: none;
+    color: $text-muted;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+
+    &:hover {
+      color: $blue-primary;
+    }
+
+    &.active {
+      color: $blue-primary;
+      font-weight: 600;
+    }
+  }
+}
+
+.actionsSection {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-shrink: 0;
+}
+
+.searchBar {
+  display: none;
+  align-items: center;
+  background: #f3f4f6;
+  padding: 0.5rem 1rem;
+  border-radius: 99px;
+  color: #9ca3af;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+
+  &:focus-within {
+    background: white;
+    border-color: $blue-primary;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  }
+
+  @media (min-width: 1024px) {
+    display: flex;
+  }
+
+  input {
+    background: transparent;
+    border: none;
+    outline: none;
+    margin-left: 0.6rem;
+    font-size: 0.9rem;
+    width: 200px;
+    color: $text-main;
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.iconBtn {
+  position: relative;
+  background: none;
+  border: none;
+  padding: 0.6rem;
+  color: $text-main;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: flex;
+
+  &:hover {
+    background: #f3f4f6;
+    color: $blue-primary;
+  }
+}
+
+.badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.userBtn {
+  display: none;
+  @media (min-width: 640px) {
+    display: flex;
+  }
+}
+
+
+.divider {
+  border: none;
+  border-top: 1px solid #f3f4f6;
+  margin: 0.5rem 0;
+}
+
+.loginBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: $blue-primary;
+  color: white;
+  padding: 0.5rem 1.2rem;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+
+  span {
+    display: none;
+    @media (min-width: 640px) {
+      display: inline;
+    }
+  }
+
+  &:hover {
+    background-color: color.adjust($blue-primary, $lightness: -5%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px -2px rgba(37, 99, 235, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; 
+}

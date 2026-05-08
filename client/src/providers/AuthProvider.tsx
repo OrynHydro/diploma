@@ -5,6 +5,7 @@ import { store } from '@/store/store'
 import { useActions } from '@/hooks/useActions'
 import { useAuth } from '@/hooks/useAuth'
 import { api } from '@/api/api'
+import { Sparkles } from 'lucide-react' 
 import s from './AuthProvider.module.scss'
 
 const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
@@ -23,7 +24,7 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
                 })
 
                 const { data: chatData } = await api.get('/chats')
-				setMessages(Array.isArray(chatData) ? chatData : (chatData.messages || []))
+                setMessages(Array.isArray(chatData) ? chatData : (chatData.messages || []))
 
             } catch (error) {
                 let guestId = localStorage.getItem('guestId')
@@ -40,9 +41,9 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
 
                 try {
                     const { data: guestChatData } = await api.get('/chats', { 
-						params: { guestId } 
-					})
-					setMessages(Array.isArray(guestChatData) ? guestChatData : (guestChatData.messages || []))
+                        params: { guestId } 
+                    })
+                    setMessages(Array.isArray(guestChatData) ? guestChatData : (guestChatData.messages || []))
                 } catch (chatError) {
                     setMessages([])
                 }
@@ -56,9 +57,20 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
 
     if (isLoading) {
         return (
-            <div>
-                    Синхронізація...
+            <div className={s.syncContainer}>
+                <div className={s.content}>
+                    <div className={s.logoWrapper}>
+                        <Sparkles className={s.icon} size={40} />
+                        <div className={s.pulse} />
+                    </div>
+                    <h2 className={s.title}>TechStore AI</h2>
+                    <p className={s.subtitle}>Синхронізація сесії...</p>
+                    <div className={s.loaderBar}>
+                        <div className={s.progress} />
+                    </div>
                 </div>
+                <div className={s.bgDecoration} />
+            </div>
         )
     }
 

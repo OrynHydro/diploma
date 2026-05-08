@@ -6,6 +6,7 @@ import { useChat } from '@/hooks/useChat'
 import { useActions } from '@/hooks/useActions'
 import { useAuth } from '@/hooks/useAuth'
 import { api } from '@/api/api'
+import { usePathname } from 'next/navigation'
 
 import s from './Chatbot.module.scss'
 import { IMessage } from '@shared/interfaces/message.interface'
@@ -14,6 +15,8 @@ const Chatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+
+  const pathname = usePathname()
   
   const { messages } = useChat()
   const { addMessage } = useActions()
@@ -24,6 +27,13 @@ const Chatbot: React.FC = () => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
+
+  useEffect(() => {
+    const timeout = requestAnimationFrame(() => {
+      setIsOpen(false);
+    });
+    return () => cancelAnimationFrame(timeout);
+  }, [pathname]);
 
   useEffect(() => {
     if (isOpen) scrollToBottom()
@@ -44,9 +54,10 @@ const Chatbot: React.FC = () => {
     })
     setIsTyping(true)
 
+
     try {
       const guestId = !isAuth ? localStorage.getItem('guestId') : undefined
-      
+
       const { data } = await api.post('/products/search', {
         query: messageText,
         userId: user?._id,
@@ -70,7 +81,6 @@ const Chatbot: React.FC = () => {
     }
   }
 
-  console.log(messages)
 
   const suggestions = [
     { icon: <Laptop size={18} />, text: 'Потужний ноутбук', query: 'Порадь потужний ноутбук для роботи' },

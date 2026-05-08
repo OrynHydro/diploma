@@ -1,3 +1,5 @@
+@use "sass:color";
+
 $gemini-gradient: linear-gradient(135deg, #4285f4 0%, #9b72cb 50%, #d96570 100%);
 $bg-dark: #18181b;
 $bg-lighter: #27272a;
@@ -268,7 +270,7 @@ $text-dim: #a1a1aa;
     transition: transform 0.2s, background 0.2s;
 
     &:hover:not(:disabled) {
-      background: lighten($accent, 5%);
+      background: color.adjust($accent, $lightness: 5%);
       transform: scale(1.05);
     }
 
@@ -279,7 +281,6 @@ $text-dim: #a1a1aa;
   }
 }
 
-/* Додаткові стилі для стартового меню */
 .startMenu {
   height: 100%;
   display: flex;

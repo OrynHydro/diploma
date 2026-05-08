@@ -3,8 +3,12 @@ import type { Request, Response } from 'express'
 import { Chat } from '../models/Chat.js'
 import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
+import dotenv from 'dotenv'
 
 const router = Router()
+dotenv.config({ path: '.env.local' })
+
+const secretKeyAccess = process.env.JWT_SECRET_ACCESS!
 
 // get chat
 router.get('/', async (req: Request, res: Response) => {
@@ -15,7 +19,7 @@ router.get('/', async (req: Request, res: Response) => {
 
         if (accessToken) {
             try {
-                const decoded = jwt.verify(accessToken, process.env.SECRET_KEY_ACCESS as string) as { userId: string };
+                const decoded = jwt.verify(accessToken, secretKeyAccess) as { userId: string };
                 userId = decoded.userId;
             } catch (e) {  }
         }
