@@ -8,6 +8,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { api } from '@/api/api'
 import { usePathname } from 'next/navigation'
 
+import ReactMarkdown from 'react-markdown'
+
 import s from './Chatbot.module.scss'
 import { IMessage } from '@shared/interfaces/message.interface'
 
@@ -140,10 +142,31 @@ const Chatbot: React.FC = () => {
                     className={`${s.messageRow} ${m.role === 'user' ? s.userRow : s.botRow}`}
                   >
                     <div className={s.avatar}>
-                       {m.role === 'user' ? <User size={14} /> : <Bot size={14} />}
+                      {m.role === 'user' ? <User size={14} /> : <Bot size={14} />}
                     </div>
-                    <div className={s.bubble}>
-                      {m.content}
+                    
+                    <div className={s.messageContent}>
+                      <div className={s.bubble}>
+                        {/* Використовуємо Markdown для гарного тексту */}
+                        <ReactMarkdown>{m.content}</ReactMarkdown>
+                      </div>
+
+                      {/* Якщо це відповідь бота і в ній є товари — рендеримо картки */}
+                      {m.role === 'assistant' && m.products && m.products.length > 0 && (
+                        <div className={s.productScroll}>
+                          {m.products.map((product) => (
+                            <div key={product._id} className={s.productCard}>
+                              <img src={product.image} alt={product.name} className={s.productImage} />
+                              <div className={s.productInfo}>
+                                <p className={s.productBrand}>{product.brand}</p>
+                                <p className={s.productName}>{product.name}</p>
+                                <p className={s.productPrice}>${product.price}</p>
+                                <button className={s.buyButton}>Переглянути</button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

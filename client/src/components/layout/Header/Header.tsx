@@ -4,15 +4,15 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ShoppingCart, User, Search, Laptop, LogIn } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth'; // Імпортуємо твій хук
+import { useAuth } from '@/hooks/useAuth'; 
 import s from './Header.module.scss';
 
 const Header: React.FC = () => {
   const pathname = usePathname();
-  const { isAuth } = useAuth(); // Отримуємо статус авторизації
+  const { isAuth } = useAuth(); 
 
   const navLinks = [
-    { name: 'Каталог', href: '/catalog' },
+    { name: 'Каталог', href: '/catalogue' },
     { name: 'Акції', href: '/deals' },
     { name: 'Доставка', href: '/delivery' },
   ];

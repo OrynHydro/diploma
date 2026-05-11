@@ -12,16 +12,19 @@ const MODEL_PRIORITY = [
 async function generateWithFallback(prompt: string): Promise<string> {
     let lastError: any = null;
 
-    const modelsToTry = [...MODEL_PRIORITY];
-
-    for (const modelName of modelsToTry) {
+    for (const modelName of MODEL_PRIORITY) {
         try {
             console.log(`[AI] Спроба запиту до моделі: ${modelName}`);
             const model = genAI.getGenerativeModel({ model: modelName });
             
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout')), 20000)
+            );
+
+            // Викликаємо генерацію
             const result = await Promise.race([
                 model.generateContent(prompt),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
+                timeoutPromise
             ]) as any;
 
             const response = await result.response;
@@ -30,32 +33,27 @@ async function generateWithFallback(prompt: string): Promise<string> {
             if (text && text.trim().length > 0) {
                 return text.trim();
             }
-            
-            console.warn(`[AI] Модель ${modelName} повернула порожню відповідь.`);
-            
         } catch (error: any) {
             lastError = error;
-            const statusCode = error.status || error.response?.status;
+            
+            const statusCode = error.status || error.response?.status || error.error?.code;
             const errorMessage = error.message || "";
 
-            console.warn(`[AI] Помилка на моделі ${modelName}: ${statusCode || errorMessage}`);
+            console.warn(`[AI] Помилка на моделі ${modelName}: ${statusCode || 'Unknown'} - ${errorMessage}`);
 
-            if (statusCode === 429 || statusCode === 503 || errorMessage.includes('Timeout')) {
-                continue; 
-            }
-            
             if (statusCode === 401 || statusCode === 403) {
-                break;
+                console.error("[AI] Критична помилка доступу (API Key).");
+                break; 
             }
+
+            console.log(`[AI] Модель ${modelName} недоступна. Спробуємо наступну...`);
+            continue; 
         }
     }
-
-    console.error("[AI] Усі моделі відмовили.");
-    
-    return "GIBBERISH"; 
+    return "GIBBERISH";
 }
 
-export async function generateStandaloneQuery(query: string, history: any[]): Promise<string> {
+export async function generateStandaloneQuery(query: string, history: any[]): Promise<any> {
     const historyText = history.map(m => `${m.role === 'user' ? 'Юзер' : 'Бот'}: ${m.content}`).join('\n');
 
     const prompt = `
@@ -64,40 +62,72 @@ export async function generateStandaloneQuery(query: string, history: any[]): Pr
 
     Поточний запит користувача: "${query}"
 
-    Завдання:
-    1. Перевір, чи є поточний запит "маячнею" (набір літер, випадкові символи). Якщо так — поверни ТІЛЬКИ "GIBBERISH".
-    2. Якщо адекватний — перепиши його, щоб він був зрозумілим без історії.
-    
-    Відповідай ТІЛЬКИ результатом. Ніяких пояснень.`;
+    Завдання: Перетвори запит у JSON об'єкт для пошуку в базі товарів.
+    Категорії: ['Laptops', 'Monitors', 'Audio', 'Components', 'Networking', 'Gaming', 'Smartphones']
 
-    return await generateWithFallback(prompt);
+    Поля JSON:
+    1. "searchQuery": (string) переписаний запит для векторного пошуку.
+    2. "excludeCategory": (string|null) категорія, яку юзер НЕ хоче бачити (напр. "крім ноутбуків").
+    3. "preferredCategory": (string|null) категорія, яку юзер явно шукає.
+    4. "isGibberish": (boolean) чи є запит маячнею.
+    5. "onlyWithDiscounts": (boolean) чи шукає користувач акційні товари.
+
+    Приклад: "Покажи щось крім ноутів" -> {"searchQuery": "техніка та периферія", "excludeCategory": "Laptops", "preferredCategory": null, "isGibberish": false}
+
+    Поверни ТІЛЬКИ JSON.`;
+
+    const response = await generateWithFallback(prompt);
+
+    console.log(response)
+
+    if (response === "GIBBERISH") return { isGibberish: true };
+
+    try {
+        const cleanJson = response.replace(/```json|```/g, "").trim();
+        return JSON.parse(cleanJson);
+    } catch (e) {
+        console.error("Помилка парсингу JSON від AI:", response);
+        return { searchQuery: query, isGibberish: false };
+    }
 }
 
-export async function generateRecommendation(query: string, products: any[]): Promise<string> {
+export async function generateRecommendation(query: string, products: any[], history: any[]): Promise<string> {
     const productInfo = products.length > 0 
-        ? products.map(p => `- ${p.name} (ціна: ${p.price}$)`).join('\n')
+        ? products.map(p => `- ${p.brand} ${p.name} (${p.category}, ціна: ${p.price}$): ${p.description}`).join('\n')
         : "Товарів не знайдено";
+
+    const historyText = history.map(m => `${m.role === 'user' ? 'Юзер' : 'Бот'}: ${m.content}`).join('\n');
     
     const prompt = `
-    Користувач шукав: "${query}"
-    Знайдені товари:
+    Ти — інтелектуальний асистент магазину електроніки. 
+    
+    КОНТЕКСТ ДІАЛОГУ:
+    ${historyText}
+
+    ПОТОЧНИЙ ЗАПИТ: "${query}"
+    
+    ЗНАЙДЕНІ ТОВАРИ В БАЗІ:
     ${productInfo}
     
-    Інструкція:
-    1. Якщо запит — маячня, а список товарів не релевантний -> "Я не можу знайти товарів за цим запитом."
-    2. Якщо релевантний -> ввічлива відповідь ТІЛЬКИ на основі цих товарів.
-    3. НЕ вигадуй нові товари.`;
+    ІНСТРУКЦІЯ:
+    1. Проаналізуй історію. Якщо ви вже спілкуєтесь, НЕ ПРИВІТЙСЯ знову. 
+    2. Дай коротку, ввічливу пораду на основі знайдених товарів.
+    3. Обов'язково згадуй бренди.
+    4. Якщо користувач просив "щось крім ноутів" (як видно з історії або запиту), підтвердь, що ти знайшов саме альтернативи.
+    5. Якщо товарів немає — запропонуй уточнити запит.
+    
+    Відповідай природно, як людина, що продовжує розмову.`;
 
     try {
         const response = await generateWithFallback(prompt);
         
         if (!response || response === "GIBBERISH") {
-            return "Наразі я не можу сформувати рекомендацію.";
+            return "Наразі я не можу знайти варіанти, що точно відповідають вашому запиту.";
         }
         
         return response;
     } catch (error) {
         console.error("Помилка в generateRecommendation:", error);
-        return "Я знайшов кілька варіантів, але зараз не можу детально їх описати.";
+        return "Я знайшов чудові варіанти, але виникла помилка при описі. Спробуйте ще раз.";
     }
 }
