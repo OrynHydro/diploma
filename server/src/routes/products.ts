@@ -87,10 +87,12 @@ router.post('/bulk', async (req: Request, res: Response) => {
 
 // search for products with ai
 router.post('/search', async (req: Request, res: Response) => {
+    const start = Date.now();
     try {
         const { query, userId, guestId } = req.body;
         let effectiveUserId = userId;
 
+        // 1. Робота з гостем
         if (!effectiveUserId && guestId) {
             let guest = await User.findOne({ guestId });
             if (!guest) {
@@ -100,22 +102,24 @@ router.post('/search', async (req: Request, res: Response) => {
             effectiveUserId = guest._id;
         }
 
-        if (!effectiveUserId) return res.status(400).json({ error: "Ідентифікатор користувача обов'язковий" });
+        if (!effectiveUserId) return res.status(400).json({ error: "Ідентифікатор обов'язковий" });
 
+        // 2. Отримання історії
         const chat = await Chat.findOne({ userId: effectiveUserId }); 
         const history = chat ? chat.messages.slice(-6) : [];
 
+        // 3. AI Обробка запиту
         const aiData = await generateStandaloneQuery(query, history);
 
         if (aiData.isGibberish) {
             const fallbackMsg = "Я не можу знайти товарів за цим запитом.";
             await addMessageToChat(effectiveUserId, 'user', query);
-            await addMessageToChat(effectiveUserId, 'assistant', fallbackMsg);
+            await addMessageToChat(effectiveUserId, 'assistant', fallbackMsg, []);
             return res.json({ answer: fallbackMsg, products: [] });
         }
 
+        // 4. Векторний пошук
         const queryVector = await generateEmbedding(aiData.searchQuery);
-        
         const pipeline: any[] = [
             { 
                 $vectorSearch: { 
@@ -128,67 +132,49 @@ router.post('/search', async (req: Request, res: Response) => {
             }
         ];
 
+        // Фільтри
         const matchStage: any = {};
-        
-        if (aiData.excludeCategory) {
-            matchStage.category = { $ne: aiData.excludeCategory };
-        }
-        
-        if (aiData.preferredCategory) {
-            matchStage.category = aiData.preferredCategory;
-        }
+        if (aiData.excludeCategory) matchStage.category = { $ne: aiData.excludeCategory };
+        if (aiData.preferredCategory) matchStage.category = aiData.preferredCategory;
+        if (aiData.onlyWithDiscounts) matchStage.discount = { $gt: 0 };
 
-        if (aiData.onlyWithDiscounts) {
-            matchStage.discount = { $gt: 0 }; 
-        }
-
-        if (Object.keys(matchStage).length > 0) {
-            pipeline.push({ $match: matchStage });
-        }
+        if (Object.keys(matchStage).length > 0) pipeline.push({ $match: matchStage });
 
         pipeline.push({ 
             $project: { 
-                name: 1, 
-                price: 1, 
-                brand: 1, 
-                category: 1, 
-                description: 1,
-                image: 1,
+                name: 1, price: 1, brand: 1, category: 1, 
+                description: 1, image: 1,
                 score: { $meta: "vectorSearchScore" } 
             } 
         });
 
         const searchResults = await Product.aggregate(pipeline);
 
+        console.log('Пошук виконаний, результати знайдені')
+
+        // 5. Генерація рекомендації
         const answer = await generateRecommendation(aiData.searchQuery, searchResults, history);
-
-        await addMessageToChat(effectiveUserId, 'user', query);
-
         const isNotFound = answer.toLowerCase().includes('я не можу знайти');
+        const finalProducts = isNotFound ? [] : searchResults;
 
-        await addMessageToChat(
-            effectiveUserId, 
-            'assistant', 
+        // 6. Збереження в БД
+        await addMessageToChat(effectiveUserId, 'user', query);
+        await addMessageToChat(effectiveUserId, 'assistant', answer, finalProducts);
+
+        // 7. ОДИН ВИКЛИК ВІДПОВІДІ (Важливо!)
+        return res.json({ 
             answer, 
-            isNotFound ? [] : searchResults 
-        );
-
-        if (isNotFound) {
-            return res.json({ answer, products: [] });
-        }
-
-        res.json({ answer, products: searchResults });
-
-        if (answer.toLowerCase().includes('я не можу знайти')) {
-            return res.json({ answer, products: [] });
-        }
-
-        res.json({ answer, products: searchResults });
+            products: isNotFound ? [] : searchResults 
+        });
 
     } catch (error) {
         console.error("Search error:", error);
-        res.status(500).json({ error: "Внутрішня помилка сервера" });
+        // Перевіряємо чи не була відповідь вже надіслана
+        if (!res.headersSent) {
+            return res.status(500).json({ error: "Внутрішня помилка сервера" });
+        }
     }
+    console.log(`Search took: ${Date.now() - start}ms`);
 });
 
 // get all products
@@ -204,6 +190,17 @@ router.get('/', async (req: Request, res: Response) => {
     } catch (error) {
         console.error("Помилка при отриманні товарів:", error);
         res.status(500).json({ error: "Внутрішня помилка сервера" });
+    }
+});
+
+// get product by id
+router.get('/:id', async (req: Request, res: Response) => {
+    try {
+        const product = await Product.findById(req.params.id).select('-vectorEmbedding');
+        if (!product) return res.status(404).json({ message: "Товар не знайдено" });
+        res.json(product);
+    } catch (error) {
+        res.status(500).json({ error: "Помилка сервера" });
     }
 });
 

@@ -33,7 +33,7 @@ router.get('/', async (req: Request, res: Response) => {
             return res.json({ messages: [] });
         }
 
-        const chat = await Chat.findOne({ userId });
+        const chat = await Chat.findOne({ userId }).populate('messages.products');
         res.json(chat ? chat.messages : []);
 
     } catch (error) {

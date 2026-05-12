@@ -13,43 +13,55 @@ async function generateWithFallback(prompt: string): Promise<string> {
     let lastError: any = null;
 
     for (const modelName of MODEL_PRIORITY) {
+        let timeoutId: any;
         try {
-            console.log(`[AI] Спроба запиту до моделі: ${modelName}`);
+            console.log(`\x1b[36m[AI] Спроба запиту до моделі:\x1b[0m ${modelName}`);
+            
             const model = genAI.getGenerativeModel({ model: modelName });
             
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Timeout')), 20000)
-            );
+            const timeoutPromise = new Promise((_, reject) => {
+                timeoutId = setTimeout(() => {
+                    reject(new Error('AI_TIMEOUT'));
+                }, 10000);
+            });
 
-            // Викликаємо генерацію
             const result = await Promise.race([
                 model.generateContent(prompt),
                 timeoutPromise
             ]) as any;
 
+            clearTimeout(timeoutId);
+
             const response = await result.response;
             const text = response.text();
             
             if (text && text.trim().length > 0) {
+                console.log(`\x1b[32m[AI] Успішна відповідь від:\x1b[0m ${modelName}`);
                 return text.trim();
             }
+
         } catch (error: any) {
-            lastError = error;
+            if (timeoutId) clearTimeout(timeoutId);
             
-            const statusCode = error.status || error.response?.status || error.error?.code;
-            const errorMessage = error.message || "";
+            lastError = error;
+            const isTimeout = error.message === 'AI_TIMEOUT';
+            
+            console.warn(
+                `\x1b[31m[AI] Помилка на моделі ${modelName}:\x1b[0m`, 
+                isTimeout ? 'TIMEOUT (10s)' : (error.status || error.message)
+            );
 
-            console.warn(`[AI] Помилка на моделі ${modelName}: ${statusCode || 'Unknown'} - ${errorMessage}`);
-
-            if (statusCode === 401 || statusCode === 403) {
-                console.error("[AI] Критична помилка доступу (API Key).");
-                break; 
+            if (error.status === 401 || error.status === 403) {
+                console.error("[AI] Критична помилка ключа API. Зупиняємо каскад.");
+                break;
             }
 
-            console.log(`[AI] Модель ${modelName} недоступна. Спробуємо наступну...`);
+            console.log(`[AI] Перемикаємось на наступну модель у списку...`);
             continue; 
         }
     }
+
+    console.error("\x1b[41m[AI] ВСІ МОДЕЛІ ВІДМОВИЛИ\x1b[0m. Останній лог:", lastError?.message);
     return "GIBBERISH";
 }
 

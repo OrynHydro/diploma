@@ -1,0 +1,171 @@
+$brand-blue: #2563eb;
+
+@keyframes pulse {
+  0% { background-color: #f5f5f5; }
+  50% { background-color: #eeeeee; }
+  100% { background-color: #f5f5f5; }
+}
+
+.wrapper {
+  background-color: #fcfcfd;
+  min-height: 100vh;
+  padding: 60px 0;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 80px;
+  padding: 0 20px;
+
+  @media (max-width: 992px) {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+.imageCard {
+  position: relative;
+  height: 550px;
+  background: #fff;
+  border-radius: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.03);
+  overflow: hidden;
+  
+  // Це створює безпечну зону для картинки
+  padding: 60px; 
+
+  &.loading::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    animation: pulse 1.5s infinite ease-in-out;
+    z-index: 1;
+  }
+}
+
+.mainImg {
+  // Замість повного заповнення (inset: 0), ми кажемо картинці 
+  // займати, наприклад, 85% простору всередині контейнера.
+  // Це гарантує відступи, навіть якщо у картинки немає своїх полів.
+  width: 85% !important; 
+  height: 85% !important;
+  left: 7.5% !important; // (100% - 85%) / 2
+  top: 7.5% !important;
+  
+  object-fit: contain !important;
+  opacity: 0;
+  transition: opacity 0.6s ease-in-out;
+  z-index: 2;
+
+  &.loaded {
+    opacity: 1;
+  }
+}
+
+.infoSection {
+  .brandTag {
+    color: $brand-blue;
+    text-transform: uppercase;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  .title {
+    font-size: 42px;
+    font-weight: 900;
+    margin: 10px 0 20px;
+    line-height: 1.1;
+  }
+
+  .priceBlock {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+
+    .price {
+      font-size: 36px;
+      font-weight: 800;
+    }
+
+    .oldPrice {
+      color: #bbb;
+      text-decoration: line-through;
+      font-size: 20px;
+    }
+  }
+
+  .description {
+    font-size: 18px;
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 40px;
+  }
+}
+
+.buyBtn {
+  width: 100%;
+  padding: 22px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 50px;
+
+  &:hover {
+    background: $brand-blue;
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px rgba($brand-blue, 0.3);
+  }
+}
+
+.specsBlock {
+  h3 {
+    font-size: 22px;
+    margin-bottom: 25px;
+    font-weight: 800;
+  }
+}
+
+.specRow {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 15px;
+
+  .specLabel {
+    color: #888;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .dots {
+    flex-grow: 1;
+    border-bottom: 1px dotted #ddd;
+    margin: 0 10px;
+  }
+
+  .specValue {
+    font-weight: 700;
+    color: #111;
+  }
+}
+
+.loader {
+  display: flex;
+  justify-content: center;
+  padding-top: 100px;
+  font-size: 24px;
+  font-weight: 700;
+  color: $brand-blue;
+}

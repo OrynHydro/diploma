@@ -7,6 +7,10 @@ const ChatSchema = new Schema({
     messages: [{
         role: { type: String, enum: ['user', 'assistant'], required: true },
         content: { type: String, required: true },
+        products: [{ 
+            type: Schema.Types.ObjectId, 
+            ref: 'Product' 
+        }], 
         timestamp: { type: Date, default: Date.now }
     }],
     updatedAt: { type: Date, default: Date.now }

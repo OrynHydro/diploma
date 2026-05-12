@@ -12,6 +12,8 @@ import ReactMarkdown from 'react-markdown'
 
 import s from './Chatbot.module.scss'
 import { IMessage } from '@shared/interfaces/message.interface'
+import Link from 'next/link'
+import Image from 'next/image'
 
 const Chatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -42,46 +44,51 @@ const Chatbot: React.FC = () => {
   }, [messages, isOpen])
 
   const handleSend = async (text: string, e?: React.FormEvent) => {
-    e?.preventDefault()
-    
-    const messageText = text.trim()
-    if (!messageText || isTyping) return
+  e?.preventDefault()
+  
+  const messageText = text.trim()
+  if (!messageText || isTyping) return
 
-    setInput('')
-    
+  setInput('')
+  
+  addMessage({ 
+    role: 'user', 
+    content: messageText, 
+    timestamp: new Date().toISOString() 
+  })
+  
+  setIsTyping(true)
+
+  try {
+    const guestId = !isAuth ? localStorage.getItem('guestId') : undefined
+
+    const { data } = await api.post('/products/search', {
+      query: messageText,
+      userId: user?._id,
+      guestId: guestId || undefined
+    })
+
     addMessage({ 
-      role: 'user', 
-      content: messageText, 
+      role: 'assistant', 
+      content: data.answer, 
+      products: data.products,
       timestamp: new Date().toISOString() 
     })
-    setIsTyping(true)
 
-
-    try {
-      const guestId = !isAuth ? localStorage.getItem('guestId') : undefined
-
-      const { data } = await api.post('/products/search', {
-        query: messageText,
-        userId: user?._id,
-        guestId: guestId || undefined
-      })
-
-      addMessage({ 
+  } catch (err) {
+    const error = err as Error; 
+    
+    console.error('Chat error:', error.message);
+    
+    addMessage({ 
         role: 'assistant', 
-        content: data.answer, 
-        timestamp: new Date().toISOString() 
-      })
-    } catch (error) {
-        console.error('Chat error:', error)
-        addMessage({ 
-            role: 'assistant', 
-            content: 'Вибачте, сталася помилка. Спробуйте пізніше.',
-            timestamp: new Date().toISOString()
-        })
-    } finally {
-      setIsTyping(false)
-    }
+        content: `Помилка: ${error.message}. Спробуйте пізніше.`,
+        timestamp: new Date().toISOString()
+    });
+  } finally {
+      setIsTyping(false);
   }
+}
 
 
   const suggestions = [
@@ -147,23 +154,33 @@ const Chatbot: React.FC = () => {
                     
                     <div className={s.messageContent}>
                       <div className={s.bubble}>
-                        {/* Використовуємо Markdown для гарного тексту */}
                         <ReactMarkdown>{m.content}</ReactMarkdown>
                       </div>
 
-                      {/* Якщо це відповідь бота і в ній є товари — рендеримо картки */}
                       {m.role === 'assistant' && m.products && m.products.length > 0 && (
                         <div className={s.productScroll}>
                           {m.products.map((product) => (
-                            <div key={product._id} className={s.productCard}>
-                              <img src={product.image} alt={product.name} className={s.productImage} />
+                            <Link 
+                              href={`/product/${product._id}`} 
+                              key={product._id} 
+                              className={s.productCard}
+                              onClick={() => setIsOpen(false)} 
+                            >
+                              <div className={s.productImageWrapper}>
+                                <Image src={product.image} alt={product.name} className={s.productImage} fill sizes="150px" />
+                              </div>
                               <div className={s.productInfo}>
                                 <p className={s.productBrand}>{product.brand}</p>
                                 <p className={s.productName}>{product.name}</p>
-                                <p className={s.productPrice}>${product.price}</p>
-                                <button className={s.buyButton}>Переглянути</button>
+                                <div className={s.productFooter}>
+                                  <p className={s.productPrice}>${product.price}</p>
+                                  <div className={s.viewLink}>
+                                    <span>Детальніше</span>
+                                    <Zap size={12} fill="currentColor" />
+                                  </div>
+                                </div>
                               </div>
-                            </div>
+                            </Link>
                           ))}
                         </div>
                       )}

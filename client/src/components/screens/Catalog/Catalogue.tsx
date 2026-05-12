@@ -4,6 +4,7 @@ import { IProduct } from '@shared/interfaces/product.interface'; // Шлях д�
 import s from './Catalogue.module.scss';
 import Image from 'next/image';
 import { api } from '@/api/api';
+import Link from 'next/link';
 
 const categoryMap: Record<string, string> = {
     'All': 'Всі товари',
@@ -70,7 +71,7 @@ const CataloguePage: FC = () => {
                 ) : (
                     <div className={s.grid}>
                         {filteredProducts.map(product => (
-                            <div key={product.name} className={s.card}>
+                            <Link href={`/product/${product._id}`} key={product.name} className={s.card}>
                                 <div className={s.imageWrapper}>
                                     <Image 
                                         src={product.image} 
@@ -90,7 +91,7 @@ const CataloguePage: FC = () => {
                                     <p className={s.price}>${product.price}</p>
                                     <button className={s.addBtn}>У кошик</button>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 )}

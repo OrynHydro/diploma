@@ -50,7 +50,6 @@ const AuthPage: FC = () => {
                     setView('verify');
                 } 
                 else if (view === 'verify') {
-                    // Крок 2: Перевірка введеного коду
                     if (value.userCode !== value.verificationCode) {
                         setError('Код не співпадає!')
                         return
@@ -112,7 +111,6 @@ const AuthPage: FC = () => {
                         {view === 'verify' && 'Перевірка SMS'}
                     </h2>
 
-                    {/* Показуємо глобальну помилку тільки НЕ в режимі verify, щоб не було дублювання */}
                     {error && view !== 'verify' && <div className={s.errorMessage}>{error}</div>}
 
                     {view !== 'verify' ? (
@@ -176,7 +174,6 @@ const AuthPage: FC = () => {
                                             onChange={(e) => field.handleChange(e.target.value)}
                                             autoFocus
                                         />
-                                        {/* Виводимо помилку Zod або серверний error (н-р, про існуючого юзера чи невірний код) тільки тут */}
                                         {(field.state.meta.errors.length > 0 || error) && (
                                             <span className={s.errorHint}>
                                                 {field.state.meta.errors.length > 0 
