@@ -1,6 +1,6 @@
-import CataloguePage from "@/components/screens/Catalog/Catalogue";
+import CataloguePage from "@/components/screens/Catalogue/Catalogue";
 
-export default function Auth() {
+export default function Catalogue() {
   return (
     <CataloguePage />
   );

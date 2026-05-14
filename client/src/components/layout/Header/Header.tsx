@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { ShoppingCart, User, Search, Laptop, LogIn } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth'; 
 import s from './Header.module.scss';
+import { useCart } from '@/hooks/useCart';
 
 const Header: React.FC = () => {
   const pathname = usePathname();
@@ -16,6 +17,8 @@ const Header: React.FC = () => {
     { name: 'Акції', href: '/deals' },
     { name: 'Доставка', href: '/delivery' },
   ];
+
+  const {items} = useCart()
 
   return (
     <header className={s.header}>
@@ -50,7 +53,7 @@ const Header: React.FC = () => {
             <div className={s.buttonGroup}>
               <Link href="/cart" className={s.iconBtn}>
                 <ShoppingCart size={24} />
-                <span className={s.badge}>3</span>
+                <span className={s.badge}>{items.length}</span>
               </Link>
               
               {isAuth ? (

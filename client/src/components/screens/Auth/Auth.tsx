@@ -2,16 +2,19 @@
 import { FC, useState } from 'react'
 import s from './Auth.module.scss'
 import { useForm } from '@tanstack/react-form'
-import { api } from '@/api/api'
 import { useActions } from '@/hooks/useActions'
 import { loginSchema } from '@/libs/schema/login.schema'
 import { registerSchema } from '@/libs/schema/register.schema'
 import z from 'zod'
-import axios from 'axios'
+import { useAuthMutation } from '@/hooks/useAuthMutation'
+import { toast } from 'react-hot-toast'
 
 const AuthPage: FC = () => {
     const [view, setView] = useState<'login' | 'register' | 'verify'>('login')
     const [error, setError] = useState<string>('')
+    const loginMut = useAuthMutation('login')
+    const smsMut = useAuthMutation('sms')
+    const registerMut = useAuthMutation('register')
 
     const { setUser } = useActions()
 
@@ -31,49 +34,48 @@ const AuthPage: FC = () => {
                 : registerSchema
         },
         onSubmit: async ({ value }) => {
-            setError('')
-            
-            try {
-                if (view === 'login') {
-                    const { data } = await api.post('/users/login', {
-                        phone: value.phone,
-                        password: value.password
-                    })
-                    setUser(data.user)
-                    window.location.assign('/');
-                } 
-                else if (view === 'register') {
-                    const res = await api.post('/sms');
-                    form.setFieldValue('verificationCode', res.data.code.toString());
-                    console.log(res.data.code)
-                    setError('');
-                    setView('verify');
-                } 
-                else if (view === 'verify') {
-                    if (value.userCode !== value.verificationCode) {
-                        setError('Код не співпадає!')
-                        return
+            if (view === 'login') {
+                loginMut.mutate({ 
+                    phone: value.phone, 
+                    password: value.password 
+                }, {
+                    onSuccess: (data) => {
+                        setUser(data.user)
+                        window.location.assign('/')
                     }
-                    
-                    const guestId = localStorage.getItem('guestId')
-                    const { data } = await api.post('/users', {
-                        phone: value.phone,
-                        password: value.password,
-                        ...(guestId && { guestId })
-                    })
-                    
-                    if (guestId) localStorage.removeItem('guestId')
-                    setUser(data.user)
-                    window.location.assign('/');
+                })
+            } 
+            
+            else if (view === 'register') {
+                smsMut.mutate({ phone: value.phone }, { 
+                    onSuccess: (res) => {
+                        console.log('SMS Code (dev):', res.code) 
+                        form.setFieldValue('verificationCode', res.code.toString())
+                        setView('verify')
+                        toast.success('Код відправлено')
+                    }
+                })
+            }
+            
+            else if (view === 'verify') {
+                if (value.userCode !== value.verificationCode) {
+                    setError('Код не співпадає!')
+                    toast.error('Код не співпадає!')
+                    return
                 }
-            } catch (err: unknown) {
-                if (axios.isAxiosError(err)) {
-                    const message = err.response?.data?.message || 'Помилка сервера'
-                    setError(message)
-                } else {
-                    setError('Сталася непередбачувана помилка')
-                }
-                console.error(err)
+
+                const guestId = localStorage.getItem('guestId')
+                registerMut.mutate({
+                    phone: value.phone,
+                    password: value.password,
+                    ...(guestId && { guestId })
+                }, {
+                    onSuccess: (data) => {
+                        if (guestId) localStorage.removeItem('guestId')
+                        setUser(data.user)
+                        window.location.assign('/')
+                    }
+                })
             }
         }
     })

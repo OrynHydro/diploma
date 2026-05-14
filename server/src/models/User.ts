@@ -16,6 +16,12 @@ const UserSchema: Schema = new mongoose.Schema<IUserDocument>(
     password: {
         type: String,
     },
+    name: {
+        type: String,
+    },
+    email: {
+        type: String
+    },
         isGuest: { type: Boolean, default: false },
         guestId: { type: String, unique: true, sparse: true }
 	},

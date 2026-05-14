@@ -1,0 +1,168 @@
+$brand-blue: #2563eb;
+$bg-gray: #f9fafb;
+
+.wrapper {
+  background: $bg-gray;
+  min-height: 90vh;
+  padding: 40px 20px;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 30px;
+
+  @media (max-width: 850px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Sidebar & User Card
+.userCard {
+  background: #fff;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  text-align: center;
+  margin-bottom: 20px;
+
+  .avatarWrapper {
+    width: 80px;
+    height: 80px;
+    background: #f3f4f6;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    color: #9ca3af;
+  }
+
+  .userMeta {
+    h2 { font-size: 20px; font-weight: 700; margin-bottom: 5px; }
+    span { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 6px; 
+      color: #6b7280; 
+      font-size: 14px; 
+    }
+  }
+}
+
+.logoutBtn {
+  margin-top: 20px;
+  width: 100%;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #fee2e2;
+  color: #ef4444;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover { background: #fef2f2; }
+}
+
+// Navigation Menu
+.menu {
+  background: #fff;
+  border-radius: 20px;
+  padding: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+
+  .menuItem {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: none;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #4b5563;
+    transition: all 0.2s;
+
+    svg:last-child { margin-left: auto; opacity: 0.3; }
+
+    &:hover { background: #f9fafb; color: #111; }
+
+    &.active {
+      background: rgba($brand-blue, 0.05);
+      color: $brand-blue;
+      svg:first-child { color: $brand-blue; }
+    }
+  }
+}
+
+// Main Content Area
+.main {
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+
+  h3 { font-size: 22px; font-weight: 700; margin-bottom: 30px; }
+}
+
+.emptyOrders {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  color: #9ca3af;
+
+  p { margin: 15px 0 25px; font-size: 16px; }
+
+  .shopBtn {
+    padding: 12px 24px;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover { background: $brand-blue; }
+  }
+}
+
+// Guest State
+.guestWrapper {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+}
+
+.guestContent {
+  max-width: 400px;
+  h1 { font-size: 28px; font-weight: 800; margin: 20px 0 10px; }
+  p { color: #6b7280; margin-bottom: 30px; line-height: 1.5; }
+  .loginBtn {
+    width: 100%;
+    padding: 16px;
+    background: $brand-blue;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 15px rgba($brand-blue, 0.2);
+  }
+}

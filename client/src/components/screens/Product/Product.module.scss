@@ -1,171 +1,312 @@
 $brand-blue: #2563eb;
-
-@keyframes pulse {
-  0% { background-color: #f5f5f5; }
-  50% { background-color: #eeeeee; }
-  100% { background-color: #f5f5f5; }
-}
+$brand-green: #28a745;
 
 .wrapper {
-  background-color: #fcfcfd;
-  min-height: 100vh;
-  padding: 60px 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
 }
 
 .container {
-  max-width: 1100px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 80px;
-  padding: 0 20px;
+  display: flex;
+  gap: 50px;
+  align-items: flex-start;
 
   @media (max-width: 992px) {
-    grid-template-columns: 1fr;
-    gap: 40px;
+    flex-direction: column;
   }
+}
+
+.imageSection {
+  flex: 1;
+  position: sticky;
+  top: 100px;
+  width: 100%;
 }
 
 .imageCard {
-  position: relative;
-  height: 550px;
+  position: relative; 
+  width: 100%;
+  aspect-ratio: 1 / 1;
   background: #fff;
-  border-radius: 32px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.03);
-  overflow: hidden;
-  
-  // Це створює безпечну зону для картинки
-  padding: 60px; 
+  border: 1px solid #f0f0f0;
 
-  &.loading::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    animation: pulse 1.5s infinite ease-in-out;
-    z-index: 1;
-  }
+  // &.loading {
+  //   background: #f9f9f9;
+  // }
 }
 
 .mainImg {
-  // Замість повного заповнення (inset: 0), ми кажемо картинці 
-  // займати, наприклад, 85% простору всередині контейнера.
-  // Це гарантує відступи, навіть якщо у картинки немає своїх полів.
-  width: 85% !important; 
-  height: 85% !important;
-  left: 7.5% !important; // (100% - 85%) / 2
-  top: 7.5% !important;
-  
-  object-fit: contain !important;
-  opacity: 0;
-  transition: opacity 0.6s ease-in-out;
-  z-index: 2;
-
-  &.loaded {
-    opacity: 1;
-  }
+  object-fit: contain;
+  padding: 40px;
 }
 
 .infoSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.headerInfo {
   .brandTag {
+    background: #f0f4ff;
     color: $brand-blue;
-    text-transform: uppercase;
-    font-weight: 800;
+    padding: 6px 12px;
+    border-radius: 8px;
     font-size: 14px;
-    letter-spacing: 1px;
+    font-weight: 600;
+    text-transform: uppercase;
   }
 
   .title {
-    font-size: 42px;
-    font-weight: 900;
-    margin: 10px 0 20px;
-    line-height: 1.1;
+    font-size: 36px;
+    font-weight: 800;
+    margin: 15px 0;
+    line-height: 1.2;
   }
 
   .priceBlock {
     display: flex;
     align-items: center;
     gap: 15px;
-    margin-bottom: 30px;
 
     .price {
-      font-size: 36px;
-      font-weight: 800;
+      font-size: 32px;
+      font-weight: 900;
+      color: #111;
     }
 
     .oldPrice {
-      color: #bbb;
-      text-decoration: line-through;
       font-size: 20px;
+      color: #aaa;
+      text-decoration: line-through;
     }
-  }
-
-  .description {
-    font-size: 18px;
-    color: #444;
-    line-height: 1.6;
-    margin-bottom: 40px;
   }
 }
 
+.description {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #444;
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+}
+
 .buyBtn {
-  width: 100%;
-  padding: 22px;
-  background: #000;
+  background: #111;
   color: #fff;
   border: none;
-  border-radius: 16px;
+  padding: 18px;
+  border-radius: 12px;
   font-size: 18px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-bottom: 50px;
+  transition: all 0.2s;
 
   &:hover {
     background: $brand-blue;
-    transform: translateY(-4px);
-    box-shadow: 0 15px 30px rgba($brand-blue, 0.3);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &.added {
+    background-color: $brand-green;
+    animation: bounce 0.4s ease;
   }
 }
 
 .specsBlock {
+  margin-top: 20px;
+  
   h3 {
-    font-size: 22px;
-    margin-bottom: 25px;
-    font-weight: 800;
+    font-size: 20px;
+    margin-bottom: 20px;
   }
+}
+
+.specsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .specRow {
   display: flex;
   align-items: baseline;
-  margin-bottom: 15px;
+  gap: 10px;
 
   .specLabel {
-    color: #888;
-    font-weight: 500;
+    color: #777;
     white-space: nowrap;
   }
 
   .dots {
-    flex-grow: 1;
-    border-bottom: 1px dotted #ddd;
-    margin: 0 10px;
+    flex: 1;
+    border-bottom: 1px dotted #ccc;
   }
 
   .specValue {
-    font-weight: 700;
+    font-weight: 600;
     color: #111;
+    text-align: right;
   }
 }
 
-.loader {
+.loader, .error {
   display: flex;
   justify-content: center;
-  padding-top: 100px;
-  font-size: 24px;
-  font-weight: 700;
-  color: $brand-blue;
+  align-items: center;
+  height: 50vh;
+  font-size: 20px;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+// Анімація пульсації
+@keyframes shimmer {
+  0% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.5; }
+}
+
+%skeleton-base {
+  background: #e5e7eb;
+  border-radius: 8px;
+  animation: shimmer 1.5s infinite ease-in-out;
+}
+
+.skeletonWrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.skeletonImage {
+  @extend %skeleton-base;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 24px;
+}
+
+.skeletonBadge {
+  @extend %skeleton-base;
+  width: 80px;
+  height: 24px;
+  margin-bottom: 15px;
+}
+
+.skeletonTitle {
+  @extend %skeleton-base;
+  width: 100%;
+  height: 44px;
+  margin-bottom: 20px;
+}
+
+.skeletonPrice {
+  @extend %skeleton-base;
+  width: 150px;
+  height: 38px;
+  margin-bottom: 25px;
+}
+
+.skeletonText {
+  @extend %skeleton-base;
+  width: 100%;
+  height: 18px;
+  margin-bottom: 10px;
+}
+
+.skeletonButton {
+  @extend %skeleton-base;
+  width: 100%;
+  height: 56px;
+  margin-top: 20px;
+  border-radius: 12px;
+}
+
+.skeletonSpecs {
+  @extend %skeleton-base;
+  width: 100%;
+  height: 200px;
+  margin-top: 30px;
+}
+
+.errorWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+    padding: 20px;
+    text-align: center;
+}
+
+.errorContent {
+    max-width: 450px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.iconCircle {
+    width: 100px;
+    height: 100px;
+    background: #fef2f2; 
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.errorIcon {
+    color: #ef4444; 
+}
+
+.errorTitle {
+    font-size: 28px;
+    font-weight: 800;
+    color: #111;
+    margin-bottom: 12px;
+}
+
+.errorText {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 30px;
+}
+
+.backBtn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #111;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: $brand-blue;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba($brand-blue, 0.2);
+    }
+
+    &:active {
+        transform: scale(0.98);
+    }
 }

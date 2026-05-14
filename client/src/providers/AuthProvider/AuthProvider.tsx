@@ -6,15 +6,25 @@ import { useActions } from '@/hooks/useActions'
 import { useAuth } from '@/hooks/useAuth'
 import { api } from '@/api/api'
 import { Sparkles } from 'lucide-react' 
-import s from './AuthProvider.module.scss'
+import s from './AuthProriver.module.scss'
 
 const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
-    const { setUser, setLoading, setMessages } = useActions()
+    const { setUser, setLoading, setMessages, setCart } = useActions()
     const { isLoading } = useAuth()
 
     useEffect(() => {
         const initSession = async () => {
             setLoading(true)
+
+            try {
+                const savedCart = localStorage.getItem('cart')
+                if (savedCart) {
+                    setCart(JSON.parse(savedCart))
+                }
+            } catch (e) {
+                console.error('Помилка завантаження кошика:', e)
+            }
+
             try {
                 const { data: userData } = await api.get('/users/get-by-token')
                 
@@ -53,7 +63,7 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
         }
 
         initSession()
-    }, [setUser, setLoading, setMessages])
+    }, [setUser, setLoading, setMessages, setCart])
 
     if (isLoading) {
         return (

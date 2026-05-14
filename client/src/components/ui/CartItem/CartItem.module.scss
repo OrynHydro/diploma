@@ -1,0 +1,110 @@
+$brand-blue: #2563eb;
+
+
+.item {
+  display: flex;
+  align-items: center;
+  padding: 25px 0;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 20px;
+
+  transition: all 0.3s ease-in-out;
+  opacity: 1;
+  max-height: 200px;
+  transform: translateX(0);
+  overflow: hidden; 
+
+  &:last-child { border-bottom: none; }
+
+  &.removing {
+    opacity: 0;
+    transform: translateX(30px); 
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin: 0;
+    border-bottom-color: transparent;
+  }
+}
+
+.imageWrapper {
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0; // ВАЖЛИВО: щоб флекс-контейнер не стискав блок з картинкою
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+
+  img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain; // Це збереже пропорції мишки
+  }
+}
+.details {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111;
+    text-decoration: none;
+    &:hover { color: $brand-blue; }
+  }
+
+  .brand { color: #999; font-size: 14px; text-transform: uppercase; }
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.quantity {
+  display: flex;
+  align-items: center;
+  background: #f4f4f5;
+  border-radius: 8px;
+  padding: 4px;
+
+  button {
+    background: #fff;
+    border: none;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: 0.2s;
+    &:hover { background: $brand-blue; color: #fff; }
+  }
+
+  span { width: 40px; text-align: center; font-weight: 600; }
+}
+
+.removeBtn {
+  background: none;
+  border: none;
+  color: #d1d1d6;
+  cursor: pointer;
+  transition: 0.2s;
+  &:hover { color: #ef4444; }
+}
+
+.priceBlock {
+  text-align: right;
+  .price { font-size: 20px; font-weight: 800; display: block; }
+  .pricePerOne { color: #aaa; font-size: 12px; }
+}
+

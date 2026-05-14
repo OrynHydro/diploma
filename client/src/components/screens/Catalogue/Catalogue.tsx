@@ -1,10 +1,9 @@
 'use client'
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { IProduct } from '@shared/interfaces/product.interface'; // Шлях до твого інтерфейсу
+import { IProduct } from '@shared/interfaces/product.interface';
 import s from './Catalogue.module.scss';
-import Image from 'next/image';
 import { api } from '@/api/api';
-import Link from 'next/link';
+import ProductItem from '@/components/ui/ProductItem/ProductItem';
 
 const categoryMap: Record<string, string> = {
     'All': 'Всі товари',
@@ -71,27 +70,7 @@ const CataloguePage: FC = () => {
                 ) : (
                     <div className={s.grid}>
                         {filteredProducts.map(product => (
-                            <Link href={`/product/${product._id}`} key={product.name} className={s.card}>
-                                <div className={s.imageWrapper}>
-                                    <Image 
-                                        src={product.image} 
-                                        alt={product.name} 
-                                        width={200}  
-                                        height={200}   
-                                        className={s.productImg} 
-                                        style={{ objectFit: 'contain' }} 
-                                    />
-                                    {product.discount > 0 && (
-                                        <span className={s.badge}>-{product.discount}%</span>
-                                    )}
-                                </div>
-                                <div className={s.info}>
-                                    <span className={s.brand}>{product.brand}</span>
-                                    <h2 className={s.name}>{product.name}</h2>
-                                    <p className={s.price}>${product.price}</p>
-                                    <button className={s.addBtn}>У кошик</button>
-                                </div>
-                            </Link>
+                            <ProductItem key={product._id} product={product} />
                         ))}
                     </div>
                 )}

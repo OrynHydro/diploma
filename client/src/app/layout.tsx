@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.scss";
-import { RootProvider } from "@/providers/AuthProvider";
+import { RootProvider } from "@/providers/AuthProvider/AuthProvider";
 import Layout from "@/components/layout/layout";
+import { QueryClientProvider } from "@tanstack/react-query";
+import TanstackProvider from "@/providers/TanstackProvider/TanstackProvider";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,7 +29,29 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body><RootProvider><Layout>{children}</Layout></RootProvider></body>
+      <body>
+        <RootProvider>
+          <TanstackProvider>
+            <Toaster
+              toastOptions={{
+                style: {
+                  background: '#333',
+                  color: '#fff',
+                  borderRadius: '10px',
+                },
+                success: {
+                  duration: 3000,
+                  iconTheme: {
+                    primary: '#22c55e',
+                    secondary: '#fff',
+                  },
+                },
+              }}
+            />
+            <Layout>{children}</Layout>
+          </TanstackProvider>
+        </RootProvider>
+      </body>
     </html>
   );
 }

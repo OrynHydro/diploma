@@ -4,4 +4,6 @@ export interface IUser {
     password?:string
     isGuest: boolean;
     guestId?: string;
+    name?: string;
+    email?: string;
 }
