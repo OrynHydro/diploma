@@ -90,11 +90,27 @@ $brand-green: #28a745;
   padding: 0 15px 15px;
   margin-top: auto;
 
+  // Контейнер для вирівнювання обох цін в один рядок
+  .priceWrapper {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
   .price {
     font-size: 19px;
     font-weight: 800;
     color: #111;
-    margin-bottom: 12px;
+    margin-bottom: 0; // Скидаємо марджин, бо тепер за відступи відповідає wrapper
+  }
+
+  // Стилізація закресленої старої ціни
+  .oldPrice {
+    font-size: 14px;
+    font-weight: 500;
+    color: #999;
+    text-decoration: line-through;
   }
 
   .addBtn {

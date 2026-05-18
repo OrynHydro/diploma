@@ -19,7 +19,6 @@ $bg-gray: #f9fafb;
   }
 }
 
-// Sidebar & User Card
 .userCard {
   background: #fff;
   padding: 30px;
@@ -73,7 +72,6 @@ $bg-gray: #f9fafb;
   &:hover { background: #fef2f2; }
 }
 
-// Navigation Menu
 .menu {
   background: #fff;
   border-radius: 20px;
@@ -106,7 +104,6 @@ $bg-gray: #f9fafb;
   }
 }
 
-// Main Content Area
 .main {
   background: #fff;
   border-radius: 20px;
@@ -165,4 +162,122 @@ $bg-gray: #f9fafb;
     cursor: pointer;
     box-shadow: 0 10px 15px rgba($brand-blue, 0.2);
   }
+}
+
+.reviewsLoader {
+  color: #6b7280;
+  font-size: 15px;
+  text-align: center;
+  padding: 40px 0;
+}
+
+.profileReviewsList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profileReviewItem {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 20px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  }
+}
+
+.productMiniCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #f9fafb; // легка підкладка для блоку товару
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #f3f4f6;
+
+  .imgBox {
+    width: 50px;
+    height: 50px;
+    background: #ffffff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 1px solid #e5e7eb;
+
+    img {
+      object-fit: contain;
+    }
+  }
+
+  .pInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .pName {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111111;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      line-height: 1.3;
+
+      &:hover {
+        color: $brand-blue;
+      }
+    }
+
+    .pPrice {
+      font-size: 13px;
+      font-weight: 700;
+      color: #374151;
+    }
+  }
+}
+
+.reviewContentBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reviewMetaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .userStars {
+    display: flex;
+    gap: 2px;
+  }
+
+  .date {
+    font-size: 12px;
+    color: #9ca3af;
+  }
+}
+
+.reviewText {
+  font-size: 14px;
+  color: #4b5563;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.deletedProduct {
+  font-size: 13px;
+  color: #ef4444;
+  font-style: italic;
+  margin: 0;
 }

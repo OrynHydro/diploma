@@ -62,7 +62,7 @@ const Chatbot: React.FC = () => {
   try {
     const guestId = !isAuth ? localStorage.getItem('guestId') : undefined
 
-    const { data } = await api.post('/products/search', {
+    const { data } = await api.post('/products/ai-search', {
       query: messageText,
       userId: user?._id,
       guestId: guestId || undefined
@@ -158,32 +158,32 @@ const Chatbot: React.FC = () => {
                       </div>
 
                       {m.role === 'assistant' && m.products && m.products.length > 0 && (
-                        <div className={s.productScroll}>
-                          {m.products.map((product) => (
-                            <Link 
-                              href={`/product/${product._id}`} 
-                              key={product._id} 
-                              className={s.productCard}
-                              onClick={() => setIsOpen(false)} 
-                            >
-                              <div className={s.productImageWrapper}>
-                                <Image src={product.image} alt={product.name} className={s.productImage} fill sizes="150px" />
-                              </div>
-                              <div className={s.productInfo}>
-                                <p className={s.productBrand}>{product.brand}</p>
-                                <p className={s.productName}>{product.name}</p>
-                                <div className={s.productFooter}>
-                                  <p className={s.productPrice}>${product.price}</p>
-                                  <div className={s.viewLink}>
-                                    <span>Детальніше</span>
-                                    <Zap size={12} fill="currentColor" />
-                                  </div>
-                                </div>
-                              </div>
-                            </Link>
-                          ))}
+                        <div className={`${s.productScroll} ${m.products.length === 1 ? s.singleProduct : ''}`}>
+                            {m.products.map((product) => (
+                                <Link 
+                                    href={`/product/${product._id}`} 
+                                    key={product._id} 
+                                    className={s.productCard}
+                                    onClick={() => setIsOpen(false)} 
+                                >
+                                    <div className={s.productImageWrapper}>
+                                        <Image src={product.image} alt={product.name} className={s.productImage} fill sizes="150px" />
+                                    </div>
+                                    <div className={s.productInfo}>
+                                        <p className={s.productBrand}>{product.brand}</p>
+                                        <p className={s.productName}>{product.name}</p>
+                                        <div className={s.productFooter}>
+                                            <p className={s.productPrice}>${product.price}</p>
+                                            <div className={s.viewLink}>
+                                                <span>Детальніше</span>
+                                                <Zap size={12} fill="currentColor" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
                         </div>
-                      )}
+                    )}
                     </div>
                   </div>
                 ))}

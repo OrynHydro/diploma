@@ -1,5 +1,7 @@
+import { Router } from 'express';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+const router = Router();
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
 
 const MODEL_PRIORITY = [
@@ -66,37 +68,44 @@ async function generateWithFallback(prompt: string): Promise<string> {
 }
 
 export async function generateStandaloneQuery(query: string, history: any[]): Promise<any> {
-    const historyText = history.map(m => `${m.role === 'user' ? 'Юзер' : 'Бот'}: ${m.content}`).join('\n');
+    const розширенийКонтекст = history.slice(-3);
+    const historyText = розширенийКонтекст.map(m => `${m.role === 'user' ? 'Юзер' : 'Бот'}: ${m.content}`).join('\n');
 
     const prompt = `
-    Історія діалогу:
+    Історія діалогу (останні репліки):
     ${historyText}
 
     Поточний запит користувача: "${query}"
 
-    Завдання: Перетвори запит у JSON об'єкт для пошуку в базі товарів.
-    Категорії: ['Laptops', 'Monitors', 'Audio', 'Components', 'Networking', 'Gaming', 'Smartphones']
+    Завдання: Перетвори поточний запит у строгий JSON об'єкт для фільтрації бази товарів.
+    Категорії магазину: ['Laptops', 'Monitors', 'Audio', 'Components', 'Networking', 'Gaming', 'Smartphones']
 
     Поля JSON:
-    1. "searchQuery": (string) переписаний запит для векторного пошуку.
-    2. "excludeCategory": (string|null) категорія, яку юзер НЕ хоче бачити (напр. "крім ноутбуків").
-    3. "preferredCategory": (string|null) категорія, яку юзер явно шукає.
-    4. "isGibberish": (boolean) чи є запит маячнею.
-    5. "onlyWithDiscounts": (boolean) чи шукає користувач акційні товари.
+    1. "searchQuery": (string) ключові слова для пошуку (очищені від сполучників та зайвих брендів).
+    2. "preferredCategory": (string|null) категорія, яку юзер явно шукає на основі контексту.
+    3. "excludeCategory": (string|null) категорія, яку треба виключити.
+    4. "brand": (string|null) конкретний бренд, якщо користувач звузив пошук (напр. "Acer", "Apple", "ASUS").
+    5. "maxPrice": (number|null) верхня межа ціни, якщо юзер просить "дешевше", "не найдорожчий", або абстрактні рамки.
+    6. "onlyWithDiscounts": (boolean) пошук акційних товарів.
+    7. "isGibberish": (boolean) чи є запит повним офтопом/маячнею.
 
-    Приклад: "Покажи щось крім ноутів" -> {"searchQuery": "техніка та периферія", "excludeCategory": "Laptops", "preferredCategory": null, "isGibberish": false}
+    КРИТИЧНІ ПРАВИЛА ДЛЯ ЦІНИ (maxPrice):
+    - Якщо користувач шукає ПОТУЖНИЙ девайс (ігровий ноут, робоча станція), але пише абстрактні фрази на кшталт "не за всі гроші світу", "не найдорожчий", "адекватна ціна" при першому ж запиті — залізобетонно установи "maxPrice": 2200. Це допоможе зрізати оверпрайс преміум сегмент (на кшталт Mac Pro за 3500$).
+    - Якщо користувач пише "бюджетний", "недорогий", "дешевий" — установи "maxPrice": 800.
+    - Якщо користувач пише "Acer" або обирає бренд після того, як бот запропонував варіанти, обов'язково передай бренд у поле "brand", а в "searchQuery" залиш тільки суть запиту без інших брендів.
 
-    Поверни ТІЛЬКИ JSON.`;
+    Поверни ТІЛЬКИ чистий JSON об'єкт. Без маркдауну та зайвих слів.`;
 
     const response = await generateWithFallback(prompt);
-
-    console.log(response)
 
     if (response === "GIBBERISH") return { isGibberish: true };
 
     try {
         const cleanJson = response.replace(/```json|```/g, "").trim();
-        return JSON.parse(cleanJson);
+        const parsed = JSON.parse(cleanJson);
+        
+        console.log("[AI Query Parser] Результат:", parsed);
+        return parsed;
     } catch (e) {
         console.error("Помилка парсингу JSON від AI:", response);
         return { searchQuery: query, isGibberish: false };
@@ -140,6 +149,6 @@ export async function generateRecommendation(query: string, products: any[], his
         return response;
     } catch (error) {
         console.error("Помилка в generateRecommendation:", error);
-        return "Я знайшов чудові варіанти, але виникла помилка при описі. Спробуйте ще раз.";
+        return "Я знайшов чудові варіанти, але ви виникла помилка при описі. Спробуйте ще раз.";
     }
 }

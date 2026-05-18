@@ -10,4 +10,6 @@ export interface IProduct {
     discount: number;        
     inStock: boolean;       
     vectorEmbedding: number[];
+    rating: number;      
+    numReviews: number;
 }

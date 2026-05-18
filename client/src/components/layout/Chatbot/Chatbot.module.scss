@@ -168,10 +168,13 @@ $text-dim: #a1a1aa;
 }
 
 .messageRow {
-  display: flex;
+  display: flex !important;
   gap: 10px;
-  width: 100%; 
+  width: 100%;
   margin-bottom: 4px;
+  align-items: flex-start; 
+  max-width: 100%;
+  box-sizing: border-box;
 
   .avatar {
     width: 32px;
@@ -188,15 +191,29 @@ $text-dim: #a1a1aa;
     padding: 10px 14px;
     font-size: 14px;
     line-height: 1.5;
+    box-sizing: border-box;
   }
 }
 
+.messageContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 100%;
+  width: 100%;
+}
+
 .botRow {
-  justify-content: flex-start;
-  .avatar { background: $accent; }
+  align-items: flex-start;
+  max-width: 100%;
+  width: 100%;
+
   .messageContent {
-    width: 100%;
-    max-width: calc(100% - 42px); 
+    max-width: 85%;
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
   .bubble {
@@ -204,15 +221,65 @@ $text-dim: #a1a1aa;
     color: #e4e4e7;
     border-radius: 4px 18px 18px 18px;
     border: 1px solid rgba(255, 255, 255, 0.05);
-    width: fit-content; 
-    max-width: 100%;
+    
+    width: 100%;
+    max-width: 100%; 
+    padding: 12px 16px;
+    box-sizing: border-box;
+    
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+
+    p, span, div {
+      max-width: 100% !important;
+      width: 100% !important;
+      word-break: break-word !important;
+      overflow-wrap: break-word !important;
+      white-space: normal !important;
+      margin: 0 0 8px 0;
+      box-sizing: border-box;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    // Полный фикс списков
+    ul, ol {
+      margin: 6px 0;
+      padding-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-width: 100% !important;
+      width: 100% !important;
+      box-sizing: border-box;
+    }
+
+    li {
+      margin: 0;
+      list-style-type: disc;
+      white-space: normal !important;
+      word-break: break-word !important;
+      max-width: 100% !important;
+
+      strong {
+        color: #ffffff;
+        font-weight: 600;
+      }
+    }
   }
 }
 
 .userRow {
   align-self: flex-end;
   flex-direction: row-reverse;
-  .avatar { background: #3f3f46; }
+  
+  .avatar { 
+    background: #3f3f46; 
+  }
+  
   .messageContent {
     max-width: 80%; 
     display: flex;
@@ -372,29 +439,13 @@ $text-dim: #a1a1aa;
   }
 }
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes bounce {
-  0%, 80%, 100% { transform: scale(0); }
-  40% { transform: scale(1); }
-}
-.messageContent {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-}
-
 .productScroll {
   width: 100%;
   display: flex;
   gap: 12px;
   overflow-x: auto;
-  padding: 10px 0;
-  margin-right: -20px; 
+  padding: 8px 0;
+  box-sizing: border-box;
   
   &::-webkit-scrollbar {
     height: 4px;
@@ -404,9 +455,14 @@ $text-dim: #a1a1aa;
     border-radius: 10px;
   }
 
-  &::after {
-    content: '';
-    min-width: 20px;
+  &.singleProduct {
+    justify-content: flex-start; 
+
+    .productCard {
+      min-width: 240px; 
+      max-width: 240px; 
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15); 
+    }
   }
 }
 
@@ -420,29 +476,16 @@ $text-dim: #a1a1aa;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  
   text-decoration: none !important; 
-  
   color: inherit; 
+  box-sizing: border-box;
+  transition: all 0.2s ease;
 
   &:hover {
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba($accent, 0.4);
     transform: translateY(-2px);
-    
     text-decoration: none; 
-  }
-
-  .productName {
-    font-size: 11px;
-    height: 28px; 
-    -webkit-line-clamp: 2;
-    color: white;
-    text-decoration: none !important;
-  }
-  
-  .productPrice {
-    font-size: 12px;
   }
 }
 
@@ -452,7 +495,7 @@ $text-dim: #a1a1aa;
   height: 100px;     
   overflow: hidden; 
   background: white; 
-  border-radius: 12px 12px 0 0;
+  border-radius: 16px 16px 0 0;
 
   .productImage {
     object-fit: contain !important; 
@@ -466,6 +509,7 @@ $text-dim: #a1a1aa;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1;
 
   .productBrand {
     font-size: 10px;
@@ -491,8 +535,7 @@ $text-dim: #a1a1aa;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 6px;
-
+  margin-top: auto;
   .productPrice {
     font-size: 13px;
     font-weight: 800;
@@ -508,13 +551,23 @@ $text-dim: #a1a1aa;
     font-weight: 600;
     
     svg {
-        animation: pulse 2s infinite;
+      animation: pulse 2s infinite;
     }
   }
 }
 
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
 @keyframes pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.2); opacity: 0.7; }
-    100% { transform: scale(1); opacity: 1; }
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
 }

@@ -86,7 +86,7 @@ router.post('/bulk', async (req: Request, res: Response) => {
 });
 
 // search for products with ai
-router.post('/search', async (req: Request, res: Response) => {
+router.post('/ai-search', async (req: Request, res: Response) => {
     const start = Date.now();
     try {
         const { query, userId, guestId } = req.body;
@@ -118,63 +118,89 @@ router.post('/search', async (req: Request, res: Response) => {
             return res.json({ answer: fallbackMsg, products: [] });
         }
 
-        // 4. Векторний пошук
+        // 4. Формування вбудованого мета-фільтра (Варіант 1 з $match для безпеки та гнучкості)
+        const matchStage: any = {};
+
+        if (aiData.preferredCategory) {
+            matchStage.category = aiData.preferredCategory;
+        } else if (aiData.excludeCategory) {
+            matchStage.category = { $ne: aiData.excludeCategory };
+        }
+
+        if (aiData.brand) {
+            matchStage.brand = { $regex: new RegExp(`^${aiData.brand}$`, 'i') };
+        }
+
+        if (aiData.maxPrice) {
+            matchStage.price = { $lte: aiData.maxPrice };
+        }
+
+        if (aiData.onlyWithDiscounts) {
+            matchStage.discount = { $gt: 0 };
+        }
+
+        // 5. Побудова конвеєру агрегації з ЛІМІТОМ ТОП-4
         const queryVector = await generateEmbedding(aiData.searchQuery);
+        
         const pipeline: any[] = [
             { 
                 $vectorSearch: { 
                     index: "vector_index", 
                     path: "vectorEmbedding", 
                     queryVector, 
-                    numCandidates: 100, 
-                    limit: 10
+                    numCandidates: 50, 
+                    limit: 4 
                 } 
             }
         ];
 
-        // Фільтри
-        const matchStage: any = {};
-        if (aiData.excludeCategory) matchStage.category = { $ne: aiData.excludeCategory };
-        if (aiData.preferredCategory) matchStage.category = aiData.preferredCategory;
-        if (aiData.onlyWithDiscounts) matchStage.discount = { $gt: 0 };
-
-        if (Object.keys(matchStage).length > 0) pipeline.push({ $match: matchStage });
+        if (Object.keys(matchStage).length > 0) {
+            pipeline.push({ $match: matchStage });
+        }
 
         pipeline.push({ 
             $project: { 
                 name: 1, price: 1, brand: 1, category: 1, 
-                description: 1, image: 1,
+                description: 1, image: 1, discount: 1, specs: 1,
                 score: { $meta: "vectorSearchScore" } 
             } 
         });
 
+        // Виконуємо пошук
         const searchResults = await Product.aggregate(pipeline);
+        console.log(`[AI Search] Знайдено товарів після фільтрації базою: ${searchResults.length}`);
 
-        console.log('Пошук виконаний, результати знайдені')
+        // 6. Генерація текстової рекомендації
+        const answer = await generateRecommendation(query, searchResults, history);
+        
+        // КРОК 3: Пост-фільтрація карток. Залишаємо суто те, що бот РЕАЛЬНО згадав у тексті відповіді
+        const finalMatchedProducts = searchResults.filter(product => {
+            const nameInAnswer = answer.toLowerCase().includes(product.name.toLowerCase());
+            const brandInAnswer = answer.toLowerCase().includes(product.brand.toLowerCase());
+            return nameInAnswer || brandInAnswer;
+        });
 
-        // 5. Генерація рекомендації
-        const answer = await generateRecommendation(aiData.searchQuery, searchResults, history);
-        const isNotFound = answer.toLowerCase().includes('я не можу знайти');
-        const finalProducts = isNotFound ? [] : searchResults;
+        const isNotFound = finalMatchedProducts.length === 0 || answer.toLowerCase().includes('я не можу знайти');
+        const finalProducts = isNotFound ? [] : finalMatchedProducts;
 
-        // 6. Збереження в БД
+        // 7. Збереження історії в БД
         await addMessageToChat(effectiveUserId, 'user', query);
         await addMessageToChat(effectiveUserId, 'assistant', answer, finalProducts);
 
-        // 7. ОДИН ВИКЛИК ВІДПОВІДІ (Важливо!)
+        console.log(`Search took: ${Date.now() - start}ms`);
+
+        // 8. Відповідь клієнту
         return res.json({ 
             answer, 
-            products: isNotFound ? [] : searchResults 
+            products: finalProducts 
         });
 
     } catch (error) {
         console.error("Search error:", error);
-        // Перевіряємо чи не була відповідь вже надіслана
         if (!res.headersSent) {
             return res.status(500).json({ error: "Внутрішня помилка сервера" });
         }
     }
-    console.log(`Search took: ${Date.now() - start}ms`);
 });
 
 // get all products
@@ -193,6 +219,33 @@ router.get('/', async (req: Request, res: Response) => {
     }
 });
 
+// search by query
+router.get('/standart-search', async (req: Request, res: Response) => {
+    try {
+        const query = req.query.q;
+
+        if (!query || typeof query !== 'string' || !query.trim()) {
+            return res.status(200).json([]);
+        }
+
+        const searchStr = query.trim();
+        const escapedQuery = searchStr.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+
+        const products = await Product.find({
+            $or: [
+                { name: { $regex: escapedQuery, $options: 'i' } },
+                { brand: { $regex: escapedQuery, $options: 'i' } } 
+            ]
+        });
+        
+        return res.status(200).json(products);
+
+    } catch (error: any) {
+        console.error('Search error:', error.message);
+        return res.status(500).json({ message: "Внутрішня помилка сервера" });
+    }
+});
+
 // get product by id
 router.get('/:id', async (req: Request, res: Response) => {
     try {
@@ -203,6 +256,8 @@ router.get('/:id', async (req: Request, res: Response) => {
         res.status(500).json({ error: "Помилка сервера" });
     }
 });
+
+
 
 
 export default router;

@@ -10,6 +10,7 @@ import usersRouter from './routes/users.js'
 import productsRouter from './routes/products.js'
 import chatsRouter from './routes/chats.js'
 import smsRouter from './routes/sms.js'
+import reviewRouter from './routes/review.js'
 
 import { MongoConnect } from './config/mongo-connect.js'
 
@@ -17,7 +18,10 @@ const app: Application = express()
 
 const port = 5000
 
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000', 
+    credentials: true 
+}));
 app.use(express.json())
 app.use(cookieParser())
 
@@ -25,7 +29,7 @@ app.use('/users', usersRouter)
 app.use('/products', productsRouter)
 app.use('/chats', chatsRouter)
 app.use('/sms', smsRouter)
-
+app.use('/reviews', reviewRouter)
 
 
 MongoConnect()

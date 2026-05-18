@@ -1,13 +1,11 @@
 $brand-blue: #2563eb;
 
-
 .item {
   display: flex;
   align-items: center;
   padding: 25px 0;
   border-bottom: 1px solid #f0f0f0;
   gap: 20px;
-
   transition: all 0.3s ease-in-out;
   opacity: 1;
   max-height: 200px;
@@ -30,7 +28,7 @@ $brand-blue: #2563eb;
 .imageWrapper {
   width: 100px;
   height: 100px;
-  flex-shrink: 0; // ВАЖЛИВО: щоб флекс-контейнер не стискав блок з картинкою
+  flex-shrink: 0; 
   display: flex;
   align-items: center;
   justify-content: center;
@@ -41,9 +39,10 @@ $brand-blue: #2563eb;
   img {
     width: 100% !important;
     height: 100% !important;
-    object-fit: contain; // Це збереже пропорції мишки
+    object-fit: contain;
   }
 }
+
 .details {
   flex-grow: 1;
   display: flex;
@@ -71,9 +70,7 @@ $brand-blue: #2563eb;
 .quantity {
   display: flex;
   align-items: center;
-  background: #f4f4f5;
-  border-radius: 8px;
-  padding: 4px;
+  gap: 12px;
 
   button {
     background: #fff;
@@ -85,12 +82,37 @@ $brand-blue: #2563eb;
     justify-content: center;
     border-radius: 6px;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    transition: 0.2s;
-    &:hover { background: $brand-blue; color: #fff; }
-  }
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    color: #4b5563; 
+    transition: all 0.2s ease;
 
-  span { width: 40px; text-align: center; font-weight: 600; }
+    &:hover { 
+      background: $brand-blue; 
+      color: #fff;
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    &.deleteBtn {
+      .trash {
+        color: #9ca3af;
+        transition: color 0.2s ease;
+      }
+
+      &:hover {
+        background: #fef2f2; 
+        color: #ef4444;
+        
+        .trash {
+          color: #ef4444;
+        }
+      }
+    }
+  }
+  
+  span { width: 40px; text-align: center; font-weight: 600; font-size: 15px; user-select: none; }
 }
 
 .removeBtn {
@@ -104,7 +126,31 @@ $brand-blue: #2563eb;
 
 .priceBlock {
   text-align: right;
-  .price { font-size: 20px; font-weight: 800; display: block; }
-  .pricePerOne { color: #aaa; font-size: 12px; }
-}
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: 100px;
 
+  .price { 
+    font-size: 20px; 
+    font-weight: 800; 
+    color: #111;
+    display: block; 
+  }
+
+  // Закреслена стара ціна за всю кількість
+  .oldPrice {
+    font-size: 14px;
+    font-weight: 500;
+    color: #aaa;
+    text-decoration: line-through;
+    display: block;
+  }
+
+  .pricePerOne { 
+    color: #aaa; 
+    font-size: 12px; 
+    display: block;
+  }
+}

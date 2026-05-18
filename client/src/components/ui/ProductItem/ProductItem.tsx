@@ -1,11 +1,10 @@
 'use client'
 import React, { FC, useState } from 'react'
 import s from './ProductItem.module.scss'
-import Link from 'next/link' // Виправив імпорт
+import Link from 'next/link' 
 import Image from 'next/image'
 import { useActions } from '@/hooks/useActions'
 import { IProduct } from '@shared/interfaces/product.interface'
-import { useCart } from '@/hooks/useCart'
 
 interface ProductItemProps {
     product: IProduct
@@ -46,7 +45,15 @@ const ProductItem: FC<ProductItemProps> = ({ product }) => {
             </Link>
 
             <div className={s.actions}>
-                <p className={s.price}>${product.price}</p>
+                <div className={s.priceWrapper}>
+                    <p className={s.price}>${product.price}</p>
+                    {product.discount > 0 && (
+                        <span className={s.oldPrice}>
+                            ${Math.round(product.price / (1 - product.discount / 100))}
+                        </span>
+                    )}
+                </div>
+                
                 <button
                     className={`${s.addBtn} ${isAdded ? s.added : ''}`}
                     onClick={handleAddToCart}

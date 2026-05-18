@@ -1,4 +1,3 @@
-// src/components/screens/Cart/CartItem.tsx
 'use client'
 import React, { FC, useState } from 'react'
 import Image from 'next/image'
@@ -39,10 +38,15 @@ const CartItem: FC<{ item: ICartItem }> = ({ item }) => {
                 
                 <div className={s.controls}>
                     <div className={s.quantity}>
-                        <button onClick={handleMinus}>
-                            {item.count === 1 ? <Trash2 size={14} color="#ef4444" /> : <Minus size={16} />}
+                        <button 
+                            onClick={handleMinus} 
+                            className={item.count === 1 ? s.deleteBtn : ''}
+                        >
+                            {item.count === 1 ? <Trash2 className={s.trash} size={14} /> : <Minus size={16} />}
                         </button>
+                        
                         <span>{item.count}</span>
+                        
                         <button onClick={() => changeQuantity({ id: item._id, type: 'plus' })}>
                             <Plus size={16} />
                         </button>
@@ -54,7 +58,17 @@ const CartItem: FC<{ item: ICartItem }> = ({ item }) => {
             </div>
 
             <div className={s.priceBlock}>
+                {item.discount > 0 && (
+                    <span className={s.oldPrice}>
+                        ${Math.round((item.price / (1 - item.discount / 100)) * item.count)}
+                    </span>
+                )}
+                
                 <span className={s.price}>${item.price * item.count}</span>
+                
+                {item.count > 1 && (
+                    <span className={s.pricePerOne}>${item.price} / шт.</span>
+                )}
             </div>
         </div>
     )

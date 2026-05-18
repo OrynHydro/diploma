@@ -17,7 +17,17 @@ const ProductSchema: Schema = new mongoose.Schema<IProduct>(
         specs: { type: Schema.Types.Mixed, required: true },
         discount: { type: Number, default: 0 },
         inStock: { type: Boolean, default: true },
-        vectorEmbedding: { type: [Number], required: true }
+        vectorEmbedding: { type: [Number], required: true },
+        rating: { 
+            type: Number, 
+            required: true, 
+            default: 0 
+        },
+        numReviews: { 
+            type: Number, 
+            required: true, 
+            default: 0 
+        }
     },
     { timestamps: true }
 );
