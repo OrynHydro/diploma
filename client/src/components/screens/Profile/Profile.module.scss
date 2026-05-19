@@ -137,7 +137,6 @@ $bg-gray: #f9fafb;
   }
 }
 
-// Guest State
 .guestWrapper {
   min-height: 80vh;
   display: flex;
@@ -164,11 +163,111 @@ $bg-gray: #f9fafb;
   }
 }
 
-.reviewsLoader {
-  color: #6b7280;
-  font-size: 15px;
-  text-align: center;
-  padding: 40px 0;
+.reviewsSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 0;
+  width: 100%;
+}
+
+.skeletonCard {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px; // під твій загальний радіус карток
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
+}
+
+// Верхній блок товару всередині відгуку
+.skeletonProductBadge {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #f9f9fb;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.skeletonProductImg {
+  width: 48px;
+  height: 48px;
+  background: #e5e7eb;
+  border-radius: 8px;
+}
+
+.skeletonProductMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeletonProductTitle {
+  width: 180px;
+  height: 14px;
+  background: #e5e7eb;
+  border-radius: 4px;
+}
+
+.skeletonProductPrice {
+  width: 60px;
+  height: 12px;
+  background: #e5e7eb;
+  border-radius: 4px;
+}
+
+.skeletonRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.skeletonStars {
+  width: 100px;
+  height: 14px;
+  background: #e5e7eb;
+  border-radius: 4px;
+}
+
+.skeletonDate {
+  width: 70px;
+  height: 12px;
+  background: #e5e7eb;
+  border-radius: 4px;
+}
+
+// Текст самого відгуку
+.skeletonText {
+  width: 40%;
+  height: 14px;
+  background: #e5e7eb;
+  border-radius: 4px;
+}
+
+.skeletonProductImg, 
+.skeletonProductTitle, 
+.skeletonProductPrice, 
+.skeletonStars, 
+.skeletonDate, 
+.skeletonText {
+  animation: skeletonPulse 1.6s infinite ease-in-out;
+}
+
+@keyframes skeletonPulse {
+  0% {
+    opacity: 0.6;
+    background-color: #e5e7eb;
+  }
+  50% {
+    opacity: 1;
+    background-color: #f3f4f6;
+  }
+  100% {
+    opacity: 0.6;
+    background-color: #e5e7eb;
+  }
 }
 
 .profileReviewsList {
@@ -196,7 +295,7 @@ $bg-gray: #f9fafb;
   display: flex;
   align-items: center;
   gap: 16px;
-  background: #f9fafb; // легка підкладка для блоку товару
+  background: #f9fafb; 
   padding: 12px;
   border-radius: 12px;
   border: 1px solid #f3f4f6;
@@ -281,3 +380,109 @@ $bg-gray: #f9fafb;
   font-style: italic;
   margin: 0;
 }
+
+// СТИЛІ ДЛЯ СТОРИНКИ ЗАМОВЛЕНЬ (ВБУДОВАНІ В ТВОЮ СТРУКТУРУ)
+  .ordersList {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .orderCard {
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 20px;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: box-shadow 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    }
+  }
+
+  .orderHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed #e5e7eb;
+    padding-bottom: 12px;
+  }
+
+  .orderMetaInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; // тримаємо баланс відступів
+
+    .orderId {
+      font-size: 15px;
+      font-weight: 700;
+      color: #111111;
+    }
+
+    .orderDate {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+  }
+
+  .orderItemsList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .orderFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f3f4f6;
+    padding-top: 12px;
+    font-size: 13px;
+  }
+
+  .orderDeliveryCity {
+    color: #6b7280;
+    font-weight: 500;
+  }
+
+  .orderPriceTotal {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #374151;
+    font-weight: 600;
+
+    strong {
+      font-size: 18px;
+      font-weight: 800;
+      color: $brand-blue;
+    }
+  }
+
+  // Кольорові статуси замовлень
+  .statusBadge {
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .statusPending { background: #fef3c7; color: #d97706; }
+  .statusPaid { background: #ecfdf5; color: #059669; }
+  .statusProcessing { background: #eff6ff; color: #2563eb; }
+  .statusShipped { background: #f5f3ff; color: #7c3aed; }
+  .statusDelivered { background: #e0f2fe; color: #0369a1; }
+  .statusCancelled { background: #fef2f2; color: #dc2626; }
+
+  // Додаткові системні утиліти
+  .centerLoader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 40vh;
+    font-size: 15px;
+    color: #6b7280;
+  }

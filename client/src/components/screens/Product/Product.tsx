@@ -32,7 +32,6 @@ const ProductPage = () => {
     const { addToCart } = useActions();
     const [isAdded, setIsAdded] = useState(false);
 
-    // Стейт для форми відгуків
     const [reviewRating, setReviewRating] = useState(5);
     const [reviewText, setReviewText] = useState('');
     const [reviewError, setReviewError] = useState('');
@@ -57,7 +56,7 @@ const ProductPage = () => {
                 productId,
                 rating: reviewRating,
                 text: reviewText,
-                userName: user?.name || 'Покупець' 
+                userName: user?.firstName + ' ' + user?.lastName || 'Покупець' 
             });
 
             setReviews(prev => [res.data.review, ...prev]);

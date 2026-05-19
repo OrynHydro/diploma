@@ -64,13 +64,42 @@ $brand-green: #28a745;
 .mainInfo {
   padding: 15px 15px 10px;
 
+  .metaRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
   .brand {
     font-size: 11px;
     color: #999;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    display: block;
-    margin-bottom: 4px;
+    margin-bottom: 0; 
+  }
+
+  .rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    line-height: 1;
+
+    .ratingValue {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .reviewCount {
+      font-size: 11px;
+      color: #999;
+    }
+  }
+
+  .noRating {
+    font-size: 11px;
+    color: #ccc;
   }
 
   .name {
@@ -90,7 +119,6 @@ $brand-green: #28a745;
   padding: 0 15px 15px;
   margin-top: auto;
 
-  // Контейнер для вирівнювання обох цін в один рядок
   .priceWrapper {
     display: flex;
     align-items: baseline;
@@ -102,10 +130,9 @@ $brand-green: #28a745;
     font-size: 19px;
     font-weight: 800;
     color: #111;
-    margin-bottom: 0; // Скидаємо марджин, бо тепер за відступи відповідає wrapper
+    margin-bottom: 0;
   }
 
-  // Стилізація закресленої старої ціни
   .oldPrice {
     font-size: 14px;
     font-weight: 500;

@@ -4,7 +4,7 @@ import { useForm } from '@tanstack/react-form'
 
 import s from './ProfileEdit.module.scss'
 import { IUser } from '@shared/interfaces/user.interface'
-import  useUpdateProfile  from '@/hooks/useUpdateProfile'
+import useUpdateProfile from '@/hooks/useUpdateProfile'
 
 interface ProfileEditFormProps {
     user: IUser
@@ -15,11 +15,16 @@ const ProfileEditForm: FC<ProfileEditFormProps> = ({ user }) => {
 
     const form = useForm({
         defaultValues: {
-            name: user.name || '',
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
             email: user.email || '',
         },
         onSubmit: async ({ value }) => {
-            mutate(value)
+            mutate({
+                firstName: value.firstName,
+                lastName: value.lastName,
+                email: value.email
+            })
         },
     })
 
@@ -31,34 +36,55 @@ const ProfileEditForm: FC<ProfileEditFormProps> = ({ user }) => {
             }}
             className={s.form}
         >
-            {/* Поле імені */}
-            <form.Field 
-                name="name"
-                validators={{
-                    onChange: ({ value }) => !value ? "Ім'я обов'язкове" : undefined
-                }}
-            >
-                {(field) => (
-                    <div className={s.field}>
-                        <label>Імя</label>
-                        <input
-                            className={`${s.input} ${field.state.meta.errors.length ? s.inputError : ''}`}
-                            placeholder="Введіть ваше ім'я"
-                            value={field.state.value}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            onBlur={field.handleBlur}
-                            disabled={isPending}
-                        />
-                        {field.state.meta.errors.length > 0 && (
-                            <span className={s.errorHint}>
-                                {(field.state.meta.errors[0] as { message?: string })?.message ?? String(field.state.meta.errors[0])}
-                            </span>
-                        )}
-                    </div>
-                )}
-            </form.Field>
+                {/* Поле Имени */}
+                <form.Field 
+                    name="firstName"
+                    validators={{
+                        onChange: ({ value }) => !value ? "Ім'я обов'язкове" : undefined
+                    }}
+                >
+                    {(field) => (
+                        <div className={s.field}>
+                            <label>Ім`я</label>
+                            <input
+                                className={`${s.input} ${field.state.meta.errors.length ? s.inputError : ''}`}
+                                placeholder="Іван"
+                                value={field.state.value}
+                                onChange={(e) => field.handleChange(e.target.value)}
+                                onBlur={field.handleBlur}
+                                disabled={isPending}
+                            />
+                            {field.state.meta.errors.length > 0 && (
+                                <span className={s.errorMsg}>{field.state.meta.errors.join(', ')}</span>
+                            )}
+                        </div>
+                    )}
+                </form.Field>
 
-            {/* Поле Email (необов'язкове) */}
+                <form.Field 
+                    name="lastName"
+                    validators={{
+                        onChange: ({ value }) => !value ? "Прізвище обов'язкове" : undefined
+                    }}
+                >
+                    {(field) => (
+                        <div className={s.field}>
+                            <label>Прізвище</label>
+                            <input
+                                className={`${s.input} ${field.state.meta.errors.length ? s.inputError : ''}`}
+                                placeholder="Іванов"
+                                value={field.state.value}
+                                onChange={(e) => field.handleChange(e.target.value)}
+                                onBlur={field.handleBlur}
+                                disabled={isPending}
+                            />
+                            {field.state.meta.errors.length > 0 && (
+                                <span className={s.errorMsg}>{field.state.meta.errors.join(', ')}</span>
+                            )}
+                        </div>
+                    )}
+                </form.Field>
+
             <form.Field name="email">
                 {(field) => (
                     <div className={s.field}>
@@ -76,8 +102,6 @@ const ProfileEditForm: FC<ProfileEditFormProps> = ({ user }) => {
                 )}
             </form.Field>
 
-
-            {/* Кнопка відправки з підпискою на стан */}
             <form.Subscribe
                 selector={(state) => [state.canSubmit, state.isSubmitting]}
             >

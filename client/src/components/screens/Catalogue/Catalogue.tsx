@@ -33,6 +33,9 @@ const CataloguePage: FC = () => {
     const [maxPrice, setMaxPrice] = useState<string>('');
     const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
     const [selectedSpecs, setSelectedSpecs] = useState<Record<string, string[]>>({});
+    
+    // Новий стейт для типу сортування
+    const [sortBy, setSortBy] = useState<string>('default');
 
     // Синхронне скидання при зміні пошукового запиту в хедері
     if (searchQuery !== prevSearchQuery) {
@@ -40,6 +43,7 @@ const CataloguePage: FC = () => {
         setActiveCategory('All'); 
         setSelectedBrands([]);
         setSelectedSpecs({});
+        setSortBy('default');
     }
 
     const { data: products = [], isPending } = useQuery<IProduct[]>({
@@ -50,12 +54,9 @@ const CataloguePage: FC = () => {
         }
     });
 
-    // ПРОМІЖНИЙ МАСИВ: Товари, відфільтровані СУТО за пошуком та категорією.
-    // Саме від нього тепер залежать доступні бренди та характеристики в сайдбарі!
     const searchedAndCategoryProducts = useMemo(() => {
         let result = products;
 
-        // 1. Фільтр за пошуковим запитом
         if (searchQuery.trim()) {
             const cleanSearch = searchQuery.toLowerCase().trim();
             result = result.filter(p => 
@@ -64,7 +65,6 @@ const CataloguePage: FC = () => {
             );
         }
 
-        // 2. Фільтр за категорією
         if (activeCategory !== 'All') {
             result = result.filter(p => p.category === activeCategory);
         }
@@ -72,17 +72,12 @@ const CataloguePage: FC = () => {
         return result;
     }, [products, searchQuery, activeCategory]);
 
-
-    // 1. Динамічні бренди (залежать від пошуку та категорії)
     const uniqueBrands = useMemo(() => {
         const brands = searchedAndCategoryProducts.map(p => p.brand).filter(Boolean) as string[];
         return Array.from(new Set(brands));
     }, [searchedAndCategoryProducts]);
 
-
-    // 2. Динамічні характеристики (залежать від пошуку та категорії)
     const availableSpecs = useMemo(() => {
-        // Якщо ми на головній і пошуку немає — ховаємо спеки, щоб не робити кашу
         if (activeCategory === 'All' && !searchQuery.trim()) return {};
 
         const specsMap: Record<string, Set<string>> = {};
@@ -109,20 +104,20 @@ const CataloguePage: FC = () => {
     }, [searchedAndCategoryProducts, activeCategory, searchQuery]);
 
 
-    // КІНЦЕВИЙ МАСИВ ДЛЯ РЕНДЕРУ (накладає ще й ціну, обрані бренди та specs)
+    // КІНЦЕВИЙ МАСИВ ДЛЯ РЕНДЕРУ (фільтрує + сортує на фіналі)
     const filteredProducts = useMemo(() => {
-        let result = searchedAndCategoryProducts;
+        let result = [...searchedAndCategoryProducts]; // Робимо копію, щоб .sort() не мутував базовий масив
 
-        // 3. Фільтр по ціні
+        // Фільтр по ціні
         if (minPrice) result = result.filter(p => p.price >= Number(minPrice));
         if (maxPrice) result = result.filter(p => p.price <= Number(maxPrice));
 
-        // 4. Фільтр по обраних брендах
+        // Фільтр по обраних брендах
         if (selectedBrands.length > 0) {
             result = result.filter(p => p.brand && selectedBrands.includes(p.brand));
         }
 
-        // 5. Фільтр по обраних характеристиках
+        // Фільтр по характеристиках
         if (Object.keys(selectedSpecs).length > 0) {
             result = result.filter(product => {
                 return Object.entries(selectedSpecs).every(([specKey, selectedValues]) => {
@@ -132,8 +127,17 @@ const CataloguePage: FC = () => {
             });
         }
 
+        // НАКЛАДАЄМО СОРТУВАННЯ
+        if (sortBy === 'price_asc') {
+            result.sort((a, b) => a.price - b.price);
+        } else if (sortBy === 'price_desc') {
+            result.sort((a, b) => b.price - a.price);
+        } else if (sortBy === 'rating_desc') {
+            result.sort((a, b) => b.rating - a.rating);
+        }
+
         return result;
-    }, [searchedAndCategoryProducts, minPrice, maxPrice, selectedBrands, selectedSpecs]);
+    }, [searchedAndCategoryProducts, minPrice, maxPrice, selectedBrands, selectedSpecs, sortBy]);
 
     const handleBrandChange = (brand: string) => {
         setSelectedBrands(prev => 
@@ -169,8 +173,9 @@ const CataloguePage: FC = () => {
                                 className={activeCategory === cat ? s.active : ''}
                                 onClick={() => {
                                     setActiveCategory(cat);
-                                    setSelectedBrands([]); // Очищуємо бренди при зміні категорії
-                                    setSelectedSpecs({});  // Очищуємо характеристики
+                                    setSelectedBrands([]); 
+                                    setSelectedSpecs({});  
+                                    setSortBy('default'); // Скидаємо сортування на дефолт при зміні категорії
                                 }}
                             >
                                 {categoryMap[cat]}
@@ -215,7 +220,6 @@ const CataloguePage: FC = () => {
                     </div>
                 )}
 
-                {/* ДИНАМІЧНІ ФІЛЬТРИ ХАРАКТЕРИСТИК */}
                 {Object.entries(availableSpecs).map(([specKey, values]) => {
                     const labelTitle = specTranslations[specKey] || specKey;
 
@@ -238,7 +242,7 @@ const CataloguePage: FC = () => {
                     );
                 })}
                 
-                {(minPrice || maxPrice || selectedBrands.length > 0 || Object.keys(selectedSpecs).length > 0 || activeCategory !== 'All') && (
+                {(minPrice || maxPrice || selectedBrands.length > 0 || Object.keys(selectedSpecs).length > 0 || activeCategory !== 'All' || sortBy !== 'default') && (
                     <button 
                         className={s.resetBtn}
                         onClick={() => {
@@ -247,12 +251,12 @@ const CataloguePage: FC = () => {
                             setSelectedBrands([]);
                             setSelectedSpecs({});
                             setActiveCategory('All');
+                            setSortBy('default');
                         }}
                     >
                         Скинути фільтри
                     </button>
                 )}
-                
             </aside>
 
             <main className={s.main}>
@@ -260,7 +264,20 @@ const CataloguePage: FC = () => {
                     <h1>
                         {searchQuery ? `Пошук за запитом: "${searchQuery}"` : 'Каталог техніки'}
                     </h1>
-                    <p>Знайдено товарів: {filteredProducts.length}</p>
+                    
+                    <div className={s.catalogMeta}>
+                        <p>Знайдено товарів: {filteredProducts.length}</p>
+                        
+                        <div className={s.sortBlock}>
+                            <span>Сортувати:</span>
+                            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                                <option value="default">За замовчуванням</option>
+                                <option value="price_asc">Від дешевих до дорогих</option>
+                                <option value="price_desc">Від дорогих до дешевих</option>
+                                <option value="rating_desc">За рейтингом та відгуками</option>
+                            </select>
+                        </div>
+                    </div>
                 </header>
 
                 {isPending ? (

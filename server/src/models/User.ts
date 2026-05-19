@@ -16,8 +16,11 @@ const UserSchema: Schema = new mongoose.Schema<IUserDocument>(
     password: {
         type: String,
     },
-    name: {
+    firstName: {
         type: String,
+    },
+    lastName: {
+        type: String
     },
     email: {
         type: String

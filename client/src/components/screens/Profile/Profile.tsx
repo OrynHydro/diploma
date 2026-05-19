@@ -8,29 +8,39 @@ import s from './Profile.module.scss'
 import ProfileEditForm from '@/components/ui/ProfileEdit/ProfileEdit'
 import { api } from '@/api/api'
 import Link from 'next/link'
-interface IUserReview {
-    _id: string;
-    rating: number;
-    text: string;
-    createdAt: string;
+import { IOrder } from '@shared/interfaces/order.interface'
+import { IReview } from '@shared/interfaces/review.interface'
+interface IProfileReview extends IReview {
     product: {
         _id: string;
         name: string;
         image: string;
         price: number;
-    } | null; 
+    } | null;
+}
+
+interface IProfileOrder extends Omit<IOrder, 'deliveryInfo'> {
+    deliveryInfo: {
+        firstName: string;
+        lastName: string;
+        phone: string;
+        city: string;
+        postOffice: string;
+    };
 }
 
 const Profile: FC = () => {
     const { user, isLoading } = useAuth()
     const { logout } = useActions()
     
-    // Стейт для активної вкладки
     const [activeTab, setActiveTab] = useState<'orders' | 'edit' | 'reviews'>('orders')
     
-    // Стейт для відгуків користувача
-    const [myReviews, setMyReviews] = useState<IUserReview[]>([])
+    const [myReviews, setMyReviews] = useState<IProfileReview[]>([])
     const [reviewsLoading, setReviewsLoading] = useState(false)
+
+    // 🚨 Оновлюємо тип тут з IOrder на IProfileOrder
+    const [myOrders, setMyOrders] = useState<IProfileOrder[]>([])
+    const [ordersLoading, setOrdersLoading] = useState(false)
 
     const handleLogout = async () => {
         try {
@@ -42,6 +52,25 @@ const Profile: FC = () => {
         }
     }
 
+    // Завантаження замовлень
+    useEffect(() => {
+        if (activeTab === 'orders' && user && !user.isGuest) {
+            const fetchMyOrders = async () => {
+                try {
+                    setOrdersLoading(true)
+                    const res = await api.get('/orders/my-orders') 
+                    setMyOrders(res.data)
+                } catch (err) {
+                    console.error('Помилка завантаження замовлень:', err)
+                } finally {
+                    setOrdersLoading(false)
+                }
+            }
+            fetchMyOrders()
+        }
+    }, [activeTab, user])
+
+    // Завантаження відгуків
     useEffect(() => {
         if (activeTab === 'reviews' && user && !user.isGuest) {
             const fetchMyReviews = async () => {
@@ -59,7 +88,7 @@ const Profile: FC = () => {
         }
     }, [activeTab, user])
 
-    if (isLoading) return <div className={s.loader}>Завантаження профілю...</div>
+    if (isLoading) return <div className={s.centerLoader}>Завантаження профілю...</div>
 
     if (!user || user.isGuest) {
         return (
@@ -74,6 +103,29 @@ const Profile: FC = () => {
         )
     }
 
+    const getStatusClass = (status: string) => {
+        switch (status) {
+            case 'Paid': return s.statusPaid;
+            case 'Processing': return s.statusProcessing;
+            case 'Shipped': return s.statusShipped;
+            case 'Delivered': return s.statusDelivered;
+            case 'Cancelled': return s.statusCancelled;
+            default: return s.statusPending;
+        }
+    }
+
+    const translateStatus = (status: string) => {
+        const dictionary: Record<string, string> = {
+            Pending: 'Очікує оплати',
+            Paid: 'Оплачено',
+            Processing: 'В обробці',
+            Shipped: 'Відправлено',
+            Delivered: 'Доставлено',
+            Cancelled: 'Скасовано'
+        }
+        return dictionary[status] || status
+    }
+
     return (
         <div className={s.wrapper}>
             <div className={s.container}>
@@ -83,7 +135,11 @@ const Profile: FC = () => {
                             <User size={40} />
                         </div>
                         <div className={s.userMeta}>
-                            <h2>{user.name || 'Користувач'}</h2>
+                            <h2>
+                                {user?.firstName && user?.lastName 
+                                    ? `${user.firstName} ${user.lastName}` 
+                                    : 'Користувач'}
+                            </h2>
                             {user.email && (
                                 <span><Mail size={14} /> {user.email}</span>
                             )}
@@ -116,17 +172,95 @@ const Profile: FC = () => {
                 </aside>
 
                 <main className={s.main}>
+                    {/* ТАБ: ЗАМОВЛЕННЯ */}
                     {activeTab === 'orders' && (
                         <section className={s.section}>
                             <h3>Останні замовлення</h3>
-                            <div className={s.emptyOrders}>
-                                <Package size={40} />
-                                <p>У вас поки немає замовлень</p>
-                                <button className={s.shopBtn}>До каталогу</button>
-                            </div>
+                            
+                            {ordersLoading ? (
+                                <div className={s.reviewsSkeleton}>
+                                    {[1, 2].map((i) => (
+                                        <div key={i} className={s.skeletonCard}>
+                                            <div className={s.skeletonProductBadge} style={{ marginBottom: 0 }}>
+                                                <div className={s.skeletonProductImg}></div>
+                                                <div className={s.skeletonProductMeta}>
+                                                    <div className={s.skeletonProductTitle}></div>
+                                                    <div className={s.skeletonProductPrice}></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : myOrders.length > 0 ? (
+                                <div className={s.ordersList}>
+                                    {myOrders.map((order) => (
+                                        <div key={order._id} className={s.orderCard}>
+                                            <div className={s.orderHeader}>
+                                                <div className={s.orderMetaInfo}>
+                                                    <span className={s.orderId}>Замовлення #{order._id.slice(-6).toUpperCase()}</span>
+                                                    <span className={s.orderDate}>
+                                                        {new Date(order.createdAt).toLocaleDateString('uk-UA')}
+                                                    </span>
+                                                </div>
+                                                <span className={`${s.statusBadge} ${getStatusClass(order.status)}`}>
+                                                    {translateStatus(order.status)}
+                                                </span>
+                                            </div>
+
+                                            <div className={s.orderItemsList}>
+                                                {order.items.map((item, index) => (
+                                                    <div key={index} className={s.productMiniCard}>
+                                                        <div className={s.imgBox}>
+                                                            {item.image && (
+                                                                <Image 
+                                                                    src={item.image} 
+                                                                    alt={item.name} 
+                                                                    width={50} 
+                                                                    height={50} 
+                                                                    unoptimized
+                                                                />
+                                                            )}
+                                                        </div>
+                                                        <div className={s.pInfo}>
+                                                            <span className={s.pName}>{item.name}</span>
+                                                            <span className={s.pPrice}>
+                                                                {item.count} шт. × ${item.price}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className={s.orderFooter} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                                                <div className={s.orderDeliveryCity} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                    <span><strong>Доставка:</strong> м. {order.deliveryInfo?.city || 'Не вказано'}</span>
+                                                    {order.deliveryInfo?.postOffice && (
+                                                        <span style={{ fontSize: '13px', color: '#6b7280', lineHeight: '1.4' }}>
+                                                            {order.deliveryInfo.postOffice}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className={s.orderPriceTotal} style={{ alignSelf: 'flex-end', marginTop: '4px' }}>
+                                                    <span>Разом:</span>
+                                                    <strong>${order.totalAmount}</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className={s.emptyOrders}>
+                                    <Package size={40} />
+                                    <p>У вас поки немає замовлень</p>
+                                    <Link href="/catalogue">
+                                        <button className={s.shopBtn}>До каталогу</button>
+                                    </Link>
+                                </div>
+                            )}
                         </section>
                     )}
 
+                    {/* ТАБ: РЕДАГУВАННЯ ПРОФИЛЮ */}
                     {activeTab === 'edit' && (
                         <section className={s.section}>
                             <h3>Налаштування профілю</h3>
@@ -134,12 +268,30 @@ const Profile: FC = () => {
                         </section>
                     )}
 
+                    {/* ТАБ: ВІДГУКИ */}
                     {activeTab === 'reviews' && (
                         <section className={s.section}>
                             <h3>Історія моїх відгуків</h3>
                             
                             {reviewsLoading ? (
-                                <div className={s.reviewsLoader}>Завантаження відгуків...</div>
+                                <div className={s.reviewsSkeleton}>
+                                    {[1, 2].map((i) => (
+                                        <div key={i} className={s.skeletonCard}>
+                                            <div className={s.skeletonProductBadge}>
+                                                <div className={s.skeletonProductImg}></div>
+                                                <div className={s.skeletonProductMeta}>
+                                                    <div className={s.skeletonProductTitle}></div>
+                                                    <div className={s.skeletonProductPrice}></div>
+                                                </div>
+                                            </div>
+                                            <div className={s.skeletonRow}>
+                                                <div className={s.skeletonStars}></div>
+                                                <div className={s.skeletonDate}></div>
+                                            </div>
+                                            <div className={s.skeletonText}></div>
+                                        </div>
+                                    ))}
+                                </div>
                             ) : myReviews.length > 0 ? (
                                 <div className={s.profileReviewsList}>
                                     {myReviews.map((rev) => (
@@ -147,7 +299,7 @@ const Profile: FC = () => {
                                             {rev.product ? (
                                                 <div className={s.productMiniCard}>
                                                     <div className={s.imgBox}>
-                                                        <Image src={rev.product.image} alt={rev.product.name} width={50} height={50} objectFit="contain" />
+                                                        <Image src={rev.product.image} alt={rev.product.name} width={50} height={50} unoptimized />
                                                     </div>
                                                     <div className={s.pInfo}>
                                                         <Link href={`/product/${rev.product._id}`} className={s.pName}>

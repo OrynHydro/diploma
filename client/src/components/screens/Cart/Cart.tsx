@@ -6,6 +6,7 @@ import { useCart } from '@/hooks/useCart'
 import { useActions } from '@/hooks/useActions'
 import s from './Cart.module.scss'
 import CartItem from '@/components/ui/CartItem/CartItem'
+import { useRouter } from 'next/navigation'
 
 const CartPage: FC = () => {
     const { items } = useCart()
@@ -13,6 +14,8 @@ const CartPage: FC = () => {
     const [isClearing, setIsClearing] = useState(false)
 
     const total = items.reduce((acc, item) => acc + item.price * item.count, 0)
+
+    const router = useRouter()
 
     if (items.length === 0) {
         return (
@@ -88,9 +91,9 @@ const CartPage: FC = () => {
                                 <span>Загальна сума</span>
                                 <span>${total}</span>
                             </div>
-                            <button className={s.checkoutBtn}>
+                            <Link href="/checkout" className={s.checkoutBtn} style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>
                                 Оформити замовлення
-                            </button>
+                            </Link>
                         </div>
                     </aside>
                 </div>

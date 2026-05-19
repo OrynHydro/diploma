@@ -1,3 +1,4 @@
+@use "sass:color";
 $brand-blue: #2563eb;
 $brand-green: #28a745;
 $bg-dark: #18181b;
@@ -486,10 +487,10 @@ $text-dim: #a1a1aa;
     transition: all 0.2s ease;
 
     &:hover {
-      background: lighten($brand-blue, 5%);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-    }
+    background: color.scale($brand-blue, $lightness: 10%); // Робить колір світлішим на 10%
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba($brand-blue, 0.2); // Використовуй змінну кольору в rgba
+  }
 
     &:active {
       transform: translateY(0);

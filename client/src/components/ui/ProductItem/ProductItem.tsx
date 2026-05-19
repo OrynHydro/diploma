@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useActions } from '@/hooks/useActions'
 import { IProduct } from '@shared/interfaces/product.interface'
+import { Star } from 'lucide-react' 
 
 interface ProductItemProps {
     product: IProduct
@@ -39,7 +40,20 @@ const ProductItem: FC<ProductItemProps> = ({ product }) => {
                 </div>
 
                 <div className={s.mainInfo}>
-                    <span className={s.brand}>{product.brand}</span>
+                    <div className={s.metaRow}>
+                        <span className={s.brand}>{product.brand}</span>
+                        
+                        {product.numReviews > 0 ? (
+                            <div className={s.rating}>
+                                <Star size={13} fill="#ffbc0b" color="#ffbc0b" />
+                                <span className={s.ratingValue}>{product.rating.toFixed(1)}</span>
+                                <span className={s.reviewCount}>({product.numReviews})</span>
+                            </div>
+                        ) : (
+                            <div className={s.noRating}>Немає оцінок</div>
+                        )}
+                    </div>
+                    
                     <h2 className={s.name}>{product.name}</h2>
                 </div>
             </Link>

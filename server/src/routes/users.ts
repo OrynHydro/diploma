@@ -105,7 +105,8 @@ router.post('/login', async (req: Request, res: Response) => {
             user: { 
                 id: user._id, 
                 phone: user.phone,
-                name: user.name,
+                firstName: user.firstName,
+                lastName: user.lastName,
                 email: user.email 
             } 
         });
@@ -131,11 +132,11 @@ router.get('/get-by-token', requireAuth, async (req: Request, res: Response) => 
 
 router.put('/profile', requireAuth, async (req: Request, res: Response) => {
     try {
-        const { name, email } = req.body;
+        const { firstName, lastName, email } = req.body;
 
         const updatedUser = await User.findByIdAndUpdate(
             req.userId,
-            { $set: { name, email } },
+            { $set: { firstName, lastName, email } },
             { 
                 returnDocument: 'after', 
                 runValidators: true 
@@ -154,7 +155,6 @@ router.put('/profile', requireAuth, async (req: Request, res: Response) => {
     }
 });
 
-// 5. ВИХІД (Відкритий роут)
 router.post('/logout', (req: Request, res: Response) => {
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
