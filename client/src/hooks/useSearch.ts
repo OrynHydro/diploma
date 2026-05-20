@@ -27,7 +27,7 @@ export const useSearch = () => {
     const { data: results = [], isPending } = useQuery({
         queryKey: ['search products', debouncedTerm],
         queryFn: async () => {
-            const { data } = await api.get(`/products/standart-search?q=${encodeURIComponent(debouncedTerm)}`)
+            const { data } = await api.get(`/products?search=${encodeURIComponent(debouncedTerm)}`)
             return data
         },
         enabled: debouncedTerm.trim().length > 0,

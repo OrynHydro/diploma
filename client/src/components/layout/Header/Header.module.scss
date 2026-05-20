@@ -117,7 +117,6 @@ $border-color: #f3f4f6;
     color: #111;
   }
 
-  // ТВІЙ НОВИЙ КРЕСТИК ОЧИЩЕННЯ
   .clearBtn {
     background: transparent;
     border: none;
@@ -239,7 +238,7 @@ $border-color: #f3f4f6;
 
 .searchContainer {
   position: relative;
-  width: 280px; // можна розширити, якщо треба
+  width: 280px;
 }
 
 .searchBar {
@@ -280,7 +279,6 @@ $border-color: #f3f4f6;
   to { transform: rotate(360deg); }
 }
 
-// Стилі випадаючого списку
 .searchDropdown {
   position: absolute;
   top: calc(100% + 8px);
@@ -341,17 +339,26 @@ $border-color: #f3f4f6;
 
 .viewAll {
   display: block;
+  width: 100%;
   text-align: center;
-  padding: 12px;
-  font-size: 13px;
+  padding: 14px;
+  font-size: 14px;
   font-weight: 600;
-  color: #2563eb;
+  color: $blue-primary;
   text-decoration: none;
   background: #f8fafc;
-  transition: background 0.2s;
+  border: none; 
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-top: 1px solid #f3f4f6;
 
   &:hover {
-    background: #f1f5f9;
+    background: #eff6ff; 
+    color: color.adjust($blue-primary, $lightness: -5%);
+  }
+
+  &:active {
+    background: #dbeafe;
   }
 }
 

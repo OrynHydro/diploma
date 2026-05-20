@@ -3,11 +3,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ShoppingCart, User, Search, Laptop, LogIn, Loader2, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth'; 
 import { useCart } from '@/hooks/useCart';
-import { useSearch } from '@/hooks/useSearch'; // Імпортуємо наш хук
+import { useSearch } from '@/hooks/useSearch'; 
 import s from './Header.module.scss';
 import { IProduct } from '@shared/interfaces/product.interface';
 
@@ -17,18 +17,27 @@ const Header: React.FC = () => {
   const { isAuth } = useAuth(); 
   const { items } = useCart();
   
-  // Юзаємо наш пошуковий хук
   const { searchTerm, setSearchTerm, results, isPending } = useSearch();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
   const navLinks = [
     { name: 'Каталог', href: '/catalogue' },
-    { name: 'Акції', href: '/deals' },
+    { name: 'Акції', href: '/discounts' },
     { name: 'Доставка', href: '/delivery' },
   ];
 
-  // Закриваємо пошук при кліку в будь-яке інше місце
+  const handleViewAll = () => {
+    const params = new URLSearchParams();
+    
+    if (searchTerm) {
+      params.set('search', searchTerm);
+    }
+    
+    router.push(`/catalogue?${params.toString()}`);
+    setIsDropdownOpen(false);
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -39,15 +48,12 @@ const Header: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Якщо юзер тисне Enter — перекидаємо на повноцінну сторінку каталогу з фільтром
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchTerm.trim()) {
       setIsDropdownOpen(false);
       router.push(`/catalogue?search=${encodeURIComponent(searchTerm)}`);
     }
   };
-
-  // console.log(results)
 
   return (
     <header className={s.header}>
@@ -74,7 +80,6 @@ const Header: React.FC = () => {
           </nav>
 
           <div className={s.actionsSection}>
-            {/* Обгортка для пошуку з рефом */}
             <div className={s.searchContainer} ref={searchRef}>
              <div className={s.searchBar}>
               {isPending ? (
@@ -95,7 +100,6 @@ const Header: React.FC = () => {
                 onKeyDown={handleKeyDown}
               />
 
-              {/* КНОПКА ОЧИЩЕННЯ */}
               {searchTerm && (
                 <button 
                   type="button" 
@@ -137,13 +141,16 @@ const Header: React.FC = () => {
                           </div>
                         </Link>
                       ))}
-                      <Link 
-                        href={`/catalogue?search=${searchTerm}`}
+                      <button 
+                        type="button"
                         className={s.viewAll}
-                        onClick={() => setIsDropdownOpen(false)}
+                        onClick={() => {
+                          handleViewAll(); 
+                          setIsDropdownOpen(false);
+                        }}
                       >
                         Показати всі результати ({results.length})
-                      </Link>
+                      </button>
                     </div>
                   ) : (
                     <div className={s.noResults}>

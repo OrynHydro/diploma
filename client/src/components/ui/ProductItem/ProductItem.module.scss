@@ -5,7 +5,10 @@ $brand-green: #28a745;
   background: #fff;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  // Змінюємо тінь на більш "прозору" та додаємо рамку
+  border: 1px solid #f0f0f0; 
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); 
+  
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
@@ -13,12 +16,9 @@ $brand-green: #28a745;
   position: relative;
 
   &:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-
-    .productImg {
-      transform: scale(1.05);
-    }
+    transform: translateY(-4px); // Трохи менший підйом
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); // Тінь стає глибшою тільки при наведенні
+    border-color: #e5e7eb;
   }
 }
 

@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { api } from '@/api/api';
@@ -7,10 +7,16 @@ import { IProduct } from '@shared/interfaces/product.interface';
 import s from './Product.module.scss';
 import { specTranslations } from '@/helpers/specsTranslation';
 import { useActions } from '@/hooks/useActions';
-import { ArrowLeft, SearchX, Star } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, SearchX, Star } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { useAuth } from '@/hooks/useAuth';
+import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+import 'swiper/css/navigation'; 
+import { Navigation } from 'swiper/modules';
+import { ProductSlider } from '@/components/ui/ProductSlider/ProductSlider';
 
 interface IReview {
     _id: string;
@@ -102,6 +108,62 @@ const ProductPage = () => {
         if (productId) fetchProductAndReviews();
     }, [productId]);
 
+   const [similarLoading, setSimilarLoading] = useState(true);
+    const [similarProducts, setSimilarProducts] = useState<IProduct[]>([]);
+
+    useEffect(() => {
+        const fetchSimilar = async () => {
+            try {
+                setSimilarLoading(true);
+                const { data } = await api.get(`/products/${productId}/similar`);
+                setSimilarProducts(data);
+            } catch (error) {
+                console.error("Помилка завантаження схожих:", error);
+            } finally {
+                setSimilarLoading(false);
+            }
+        };
+        if (productId) fetchSimilar();
+    }, [productId]);
+
+
+    const [recentProducts, setRecentProducts] = useState<IProduct[]>([]);
+    const [recentLoading, setRecentLoading] = useState(true); 
+    const viewedIds = useRecentlyViewed(productId as string);
+
+    useEffect(() => {
+        const fetchRecent = async () => {
+            setRecentLoading(true); 
+            const idsToFetch = viewedIds.filter(id => id && id !== productId);
+
+            if (idsToFetch.length === 0) {
+                setRecentProducts([]);
+                setRecentLoading(false);
+                return;
+            }
+
+            try {
+                const uniqueIds = Array.from(new Set(idsToFetch));
+                const promises = uniqueIds.map(id => 
+                    api.get(`/products/${id}`).catch(() => null)
+                );
+                
+                const results = await Promise.all(promises);
+                const validProducts = results
+                    .filter(res => res !== null)
+                    .map(res => res!.data);
+
+                setRecentProducts(validProducts);
+            } catch (err) {
+                console.error("Помилка завантаження нещодавніх:", err);
+            } finally {
+                setRecentLoading(false); 
+            }
+        };
+
+        fetchRecent();
+    }, [viewedIds, productId]);
+
     const renderSkeleton = () => (
         <div className={s.skeletonWrapper}>
             <div className={s.container}>
@@ -120,6 +182,7 @@ const ProductPage = () => {
             </div>
         </div>
     );
+
 
     if (loading) return renderSkeleton();
     
@@ -143,6 +206,7 @@ const ProductPage = () => {
             </div>
         );
     }
+    
 
     return (
         <div className={s.wrapper}>
@@ -154,8 +218,10 @@ const ProductPage = () => {
                             alt={product.name} 
                             fill
                             priority 
+                            sizes="(max-width: 768px) 100vw, 50vw" 
                             className={s.mainImg}
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
+                            quality={100}
+                            unoptimized
                         />
                     </div>
                 </div>
@@ -214,6 +280,17 @@ const ProductPage = () => {
                     </div>
                 </div>
             </div>
+
+            <ProductSlider 
+                title="Схожі товари" 
+                products={similarProducts} 
+                isLoading={similarLoading} 
+            />
+            <ProductSlider 
+                title="Ви нещодавно переглядали" 
+                products={recentProducts} 
+                isLoading={recentLoading}
+            />
 
             <div className={s.reviewsSection}>
                 <h2>Відгуки покупців ({product.numReviews})</h2>

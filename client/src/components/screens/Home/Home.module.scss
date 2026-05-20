@@ -1,0 +1,90 @@
+.homeWrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.hero {
+    height: 400px;
+    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+    border-radius: 32px;
+    display: flex;
+    align-items: center;
+    padding: 0 80px;
+    margin-bottom: 60px;
+    color: white;
+
+    .heroContent {
+        max-width: 500px;
+        h1 { font-size: 48px; line-height: 1.2; margin-bottom: 20px; }
+        p { font-size: 18px; opacity: 0.9; margin-bottom: 30px; }
+    }
+
+    .heroBtn {
+        background: white;
+        color: #2563eb;
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+}
+
+.categories {
+    display: flex;
+    justify-content: center; 
+    gap: 15px;
+    padding: 0 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+
+    .catItem {
+        background: #f4f4f5;
+        padding: 16px 20px; 
+        border-radius: 16px;
+        font-weight: 600;
+        text-decoration: none;
+        color: #18181b;
+        transition: 0.2s;
+        white-space: nowrap; 
+
+        &:hover { 
+            background: #e4e4e7;
+            transform: translateY(-2px);
+        }
+    }
+}
+
+.sliderSkeleton {
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+
+    .skeletonTitle {
+        width: 200px;
+        height: 30px;
+        background: #f1f5f9;
+        border-radius: 8px;
+        margin-bottom: 24px;
+        animation: pulse 1.5s infinite;
+    }
+
+    .skeletonGrid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+
+    .skeletonCard {
+        height: 320px;
+        background: #f1f5f9;
+        border-radius: 16px;
+        animation: pulse 1.5s infinite;
+    }
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
