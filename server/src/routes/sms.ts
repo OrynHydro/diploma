@@ -10,37 +10,31 @@ dotenv.config({ path: '.env.local' })
 
 router.post('/', async (req: Request, res: Response) => {
     try {
-		// DEV MODE COMMENT
-
-        // const { number } = req.body;
+        const { number } = req.body;
         
-        // if (!number) {
-        //     return res.status(400).json({ error: "Номер телефону обов'язковий" });
-        // }
+        if (!number) {
+            return res.status(400).json({ error: "Номер телефону обов'язковий" });
+        }
 
-        // const accountSid = process.env.TWILIO_ACCOUNT_SID;
-        // const authToken = process.env.TWILIO_AUTH_TOKEN;
-        // const phoneNumber = process.env.TWILIO_PHONE_NUMBER;
+        const accountSid = process.env.TWILIO_ACCOUNT_SID;
+        const authToken = process.env.TWILIO_AUTH_TOKEN;
+        const phoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
-        // if (!accountSid || !authToken || !phoneNumber) {
-        //     throw new Error("TWILIO configuration is missing in environment variables");
-        // }
+        if (!accountSid || !authToken || !phoneNumber) {
+            throw new Error("TWILIO configuration is missing in environment variables");
+        }
 
-        // const code = GenerateCode(6);
+        const code = GenerateCode(6);
 
-        // const client = twilio(accountSid, authToken);
+        const client = twilio(accountSid, authToken);
 
-        // await client.messages.create({
-        //     body: `Ваш код для реєстрації: ${code}`,
-        //     from: phoneNumber, 
-        //     to: number,
-        // });
+        await client.messages.create({
+            body: `Ваш код для реєстрації: ${code}`,
+            from: phoneNumber, 
+            to: number,
+        });
 
-        // console.log('SMS sent successfully');
-        // res.status(200).send({ message: "Код надіслано", code }); 
-
-		const code = GenerateCode(6)
-		console.log('SMS sent successfully');
+        console.log('SMS sent successfully');
         res.status(200).send({ message: "Код надіслано", code }); 
     } catch (error) {
         console.error('Error sending SMS:', error);
