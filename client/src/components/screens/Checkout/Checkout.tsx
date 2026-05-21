@@ -31,7 +31,6 @@ const CheckoutPage: FC = () => {
     const [lastName, setLastName] = useState(user?.lastName || '')
     const [phone, setPhone] = useState(user?.phone || '')
     
-    // Нова Пошта стейти
     const [cityQuery, setCityQuery] = useState('')
     const [selectedCityRef, setSelectedCityRef] = useState('')
     const [cities, setCities] = useState<NPRef[]>([])
@@ -40,7 +39,6 @@ const CheckoutPage: FC = () => {
     const [warehouses, setWarehouses] = useState<NPRef[]>([])
     const [selectedWarehouse, setSelectedWarehouse] = useState('')
 
-    // Метод оплаты
     const [paymentMethod, setPaymentMethod] = useState<'Card' | 'Cash'>('Card')
 
     const [loading, setLoading] = useState(false)
@@ -49,7 +47,6 @@ const CheckoutPage: FC = () => {
 
     const NP_API_KEY = process.env.NEXT_PUBLIC_NP_API_KEY
 
-    // Синхронизация данных пользователя без каскадных рендеров
     useEffect(() => {
         if (!user) return
         const updateTimeout = setTimeout(() => {
@@ -60,7 +57,6 @@ const CheckoutPage: FC = () => {
         return () => clearTimeout(updateTimeout)
     }, [user?.firstName, user?.lastName, user?.phone, user])
 
-    // Поиск городов Новой Почты с дебаунсом
     useEffect(() => {
         const delayDebounce = setTimeout(async () => {
             if (cityQuery.length < 2) {
@@ -93,7 +89,6 @@ const CheckoutPage: FC = () => {
         return () => clearTimeout(delayDebounce)
     }, [cityQuery, NP_API_KEY])
 
-    // Загрузка отделений после выбора города
     useEffect(() => {
         if (!selectedCityRef) {
             const clearDelay = setTimeout(() => {
@@ -128,7 +123,6 @@ const CheckoutPage: FC = () => {
         fetchWarehouses()
     }, [selectedCityRef, NP_API_KEY])
 
-    // Закрытие дропдауна при клике вне его области
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (cityContainerRef.current && !cityContainerRef.current.contains(event.target as Node)) {
@@ -179,14 +173,12 @@ const CheckoutPage: FC = () => {
         try {
             const response = await api.post('/orders', orderData)
             
-            // Логика для наложенного платежа
             if (response.data?.status === 'success') {
                 clearCart()
                 window.location.assign('/profile')
                 return
             }
 
-            // Логика для оплаты картой (LiqPay)
             if (response.data?.status === 'liqpay_redirect') {
                 const { data, signature } = response.data
                 

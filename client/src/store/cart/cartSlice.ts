@@ -1,4 +1,4 @@
-import { IProduct } from '@shared/interfaces/product.interface'; // Перевір шлях
+import { IProduct } from '@shared/interfaces/product.interface';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface ICartItem extends IProduct {

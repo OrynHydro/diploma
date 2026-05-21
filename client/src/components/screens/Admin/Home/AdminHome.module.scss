@@ -1,0 +1,76 @@
+.wrapper {
+  h1 { margin-bottom: 30px; }
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); // 2 колонки, як ти і зробив
+  gap: 24px;
+  margin-bottom: 40px;
+  width: 100%;
+}
+
+.statCard {
+  background: white;
+  padding: 24px 32px; // Зменшений padding по Y (24px)
+  border-radius: 16px;
+  display: flex;
+  flex-direction: row; // Іконка зліва, текст справа
+  align-items: center; // Центруємо по вертикалі
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  min-height: 140px; // Трохи менша висота
+  gap: 24px; // Відступ між іконкою та текстом
+  
+  .iconWrapper {
+    width: 50px; // Трохи більша іконка
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    flex-shrink: 0; // Щоб іконка не стискалась
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column; // Текст вертикально
+    justify-content: center;
+    
+    h3 { 
+      font-size: 0.85rem; 
+      color: #64748b; 
+      margin: 0 0 4px 0; // Дуже маленький відступ
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    p { 
+      font-size: 2rem; 
+      font-weight: 800; 
+      margin: 0; 
+      color: #0f172a;
+    }
+  }
+}
+  .loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px; 
+    width: 100%;
+    gap: 12px;
+    color: #64748b;
+    font-weight: 500;
+
+    .pulse {
+      width: 10px;
+      height: 10px;
+      background-color: #3b82f6;
+      border-radius: 50%;
+      animation: pulse 1.2s infinite ease-in-out;
+    }
+  }
+
+  @keyframes pulse {
+    0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+    40% { transform: scale(1); opacity: 1; }
+  }

@@ -11,7 +11,7 @@ export interface IOrder {
     user: string;
     items: IOrderItem[];
     totalAmount: number;
-    status: 'Pending' | 'Paid' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+    status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
     createdAt: Date;
     deliveryInfo: {
         firstName: string;

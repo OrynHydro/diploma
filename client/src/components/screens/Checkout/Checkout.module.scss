@@ -141,7 +141,6 @@ $brand-blue: #2563eb;
   }
 }
 
-// Нові стилі для випадаючих списків та селекту Нової Пошти
 .dropdown {
   position: absolute;
   top: 100%;
@@ -187,7 +186,7 @@ $brand-blue: #2563eb;
   transition: border-color 0.2s;
 
   &:focus {
-    border-color: #2563eb; // $brand-blue
+    border-color: #2563eb;
   }
 
   &:disabled {

@@ -34,7 +34,6 @@ export const ProductSlider = ({ title, products, isLoading }: IProductSlider) =>
         );
     }
 
-    // Якщо товарів немає — нічого не показуємо
     if (!isLoading && products.length === 0) return null;
 
     return (

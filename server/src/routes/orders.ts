@@ -59,13 +59,15 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
             });
         }
 
+        const string = savedOrder._id.toString().slice(-6)
+
         const jsonParams = {
             public_key: LIQPAY_PUBLIC_KEY,
             version: 3,
             action: 'pay',
             amount: totalAmount,
             currency: 'USD', 
-            description: `Оплата замовлення №${savedOrder._id} у TechStore`,
+            description: `Оплата замовлення №${string} у TechStore`,
             order_id: savedOrder._id.toString(),
             
             server_url: `https://conceded-applied-unsettled.ngrok-free.dev/orders/webhook`,
@@ -117,7 +119,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
             const updatedOrder = await Order.findByIdAndUpdate(
                 new mongoose.Types.ObjectId(orderIdStr), 
                 { status: 'Processing' },
-                { new: true } 
+                { returnDocument: 'after' }
             );
 
             if (!updatedOrder) {

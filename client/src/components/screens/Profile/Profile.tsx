@@ -10,6 +10,7 @@ import { api } from '@/api/api'
 import Link from 'next/link'
 import { IOrder } from '@shared/interfaces/order.interface'
 import { IReview } from '@shared/interfaces/review.interface'
+import { translateStatus } from '@/utils/translateStatus'
 interface IProfileReview extends IReview {
     product: {
         _id: string;
@@ -38,7 +39,6 @@ const Profile: FC = () => {
     const [myReviews, setMyReviews] = useState<IProfileReview[]>([])
     const [reviewsLoading, setReviewsLoading] = useState(false)
 
-    // 🚨 Оновлюємо тип тут з IOrder на IProfileOrder
     const [myOrders, setMyOrders] = useState<IProfileOrder[]>([])
     const [ordersLoading, setOrdersLoading] = useState(false)
 
@@ -52,7 +52,6 @@ const Profile: FC = () => {
         }
     }
 
-    // Завантаження замовлень
     useEffect(() => {
         if (activeTab === 'orders' && user && !user.isGuest) {
             const fetchMyOrders = async () => {
@@ -70,7 +69,6 @@ const Profile: FC = () => {
         }
     }, [activeTab, user])
 
-    // Завантаження відгуків
     useEffect(() => {
         if (activeTab === 'reviews' && user && !user.isGuest) {
             const fetchMyReviews = async () => {
@@ -105,7 +103,6 @@ const Profile: FC = () => {
 
     const getStatusClass = (status: string) => {
         switch (status) {
-            case 'Paid': return s.statusPaid;
             case 'Processing': return s.statusProcessing;
             case 'Shipped': return s.statusShipped;
             case 'Delivered': return s.statusDelivered;
@@ -113,19 +110,6 @@ const Profile: FC = () => {
             default: return s.statusPending;
         }
     }
-
-    const translateStatus = (status: string) => {
-        const dictionary: Record<string, string> = {
-            Pending: 'Очікує оплати',
-            Paid: 'Оплачено',
-            Processing: 'В обробці',
-            Shipped: 'Відправлено',
-            Delivered: 'Доставлено',
-            Cancelled: 'Скасовано'
-        }
-        return dictionary[status] || status
-    }
-
     return (
         <div className={s.wrapper}>
             <div className={s.container}>

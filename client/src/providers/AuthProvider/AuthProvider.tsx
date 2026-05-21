@@ -30,8 +30,14 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
                 
                 setUser({
                     ...userData,
+                    role: userData.role || 'user',
                     isGuest: false
                 })
+
+                const isAdmin = userData.role === 'admin';
+                if (isAdmin) {
+                    console.log('Admin session initialized');
+                }
 
                 const { data: chatData } = await api.get('/chats')
                 setMessages(Array.isArray(chatData) ? chatData : (chatData.messages || []))
@@ -46,7 +52,8 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
 
                 setUser({
                     guestId,
-                    isGuest: true
+                    isGuest: true,
+                    role: 'user',
                 })
 
                 try {

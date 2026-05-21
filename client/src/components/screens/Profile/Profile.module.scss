@@ -174,12 +174,11 @@ $bg-gray: #f9fafb;
 .skeletonCard {
   background: #fff;
   border: 1px solid #e5e7eb;
-  border-radius: 20px; // під твій загальний радіус карток
+  border-radius: 20px; 
   padding: 24px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
 }
 
-// Верхній блок товару всередині відгуку
 .skeletonProductBadge {
   display: flex;
   align-items: center;
@@ -238,7 +237,6 @@ $bg-gray: #f9fafb;
   border-radius: 4px;
 }
 
-// Текст самого відгуку
 .skeletonText {
   width: 40%;
   height: 14px;
@@ -381,7 +379,6 @@ $bg-gray: #f9fafb;
   margin: 0;
 }
 
-// СТИЛІ ДЛЯ СТОРИНКИ ЗАМОВЛЕНЬ (ВБУДОВАНІ В ТВОЮ СТРУКТУРУ)
   .ordersList {
     display: flex;
     flex-direction: column;
@@ -414,7 +411,7 @@ $bg-gray: #f9fafb;
   .orderMetaInfo {
     display: flex;
     flex-direction: column;
-    gap: 20px; // тримаємо баланс відступів
+    gap: 20px; 
 
     .orderId {
       font-size: 15px;
@@ -462,7 +459,6 @@ $bg-gray: #f9fafb;
     }
   }
 
-  // Кольорові статуси замовлень
   .statusBadge {
     padding: 4px 12px;
     border-radius: 50px;
@@ -477,7 +473,6 @@ $bg-gray: #f9fafb;
   .statusDelivered { background: #e0f2fe; color: #0369a1; }
   .statusCancelled { background: #fef2f2; color: #dc2626; }
 
-  // Додаткові системні утиліти
   .centerLoader {
     display: flex;
     justify-content: center;

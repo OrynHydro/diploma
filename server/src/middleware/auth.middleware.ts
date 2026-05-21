@@ -3,11 +3,11 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });
-
 declare global {
     namespace Express {
         interface Request {
             userId?: string;
+            userRole?: 'user' | 'admin';
         }
     }
 }
@@ -21,11 +21,13 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
         const refreshToken = req.cookies?.refreshToken;
 
         let userId: string | null = null;
+        let userRole: 'user' | 'admin' = 'user';
 
         if (accessToken) {
             try {
-                const decoded = jwt.verify(accessToken, secretKeyAccess) as { userId: string };
+                const decoded = jwt.verify(accessToken, secretKeyAccess) as { userId: string, role: 'user' | 'admin' };
                 userId = decoded.userId;
+                userRole = decoded.role;
             } catch (e) {
                 console.log('Access token verification failed, trying refresh...');
             }
@@ -33,10 +35,15 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
 
         if (!userId && refreshToken) {
             try {
-                const decodedRefresh = jwt.verify(refreshToken, secretKeyRefresh) as { userId: string };
+                const decodedRefresh = jwt.verify(refreshToken, secretKeyRefresh) as { userId: string, role: 'user' | 'admin' };
                 userId = decodedRefresh.userId;
+                userRole = decodedRefresh.role;
 
-                const newAccessToken = jwt.sign({ userId }, secretKeyAccess, { expiresIn: '1h' });
+                const newAccessToken = jwt.sign(
+                    { userId, role: userRole }, 
+                    secretKeyAccess, 
+                    { expiresIn: '1h' }
+                );
                 
                 res.cookie('accessToken', newAccessToken, { 
                     httpOnly: true, 
@@ -45,7 +52,6 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
                     secure: process.env.NODE_ENV === 'production'
                 });
             } catch (e) {
-                console.log('Refresh token verification failed. Clearing cookies.');
                 res.clearCookie('accessToken');
                 res.clearCookie('refreshToken');
                 return res.status(401).json({ message: "Сесія завершилася, авторизуйтесь знову" });
@@ -57,6 +63,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
         }
 
         req.userId = userId;
+        req.userRole = userRole;
         return next();
 
     } catch (error) {

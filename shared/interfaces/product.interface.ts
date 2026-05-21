@@ -2,7 +2,7 @@ export interface IProduct {
     _id: string
     name: string;
     brand: string;           
-    category: 'Laptops' | 'Monitors' | 'Audio' | 'Components' | 'Networking' | 'Gaming' | 'Smartphones';
+    category: TCategory
     description: string;    
     price: number;
     image: string;          
@@ -13,3 +13,12 @@ export interface IProduct {
     rating: number;      
     numReviews: number;
 }
+
+export type TCategory = 
+  | 'Laptops' 
+  | 'Monitors' 
+  | 'Audio' 
+  | 'Components' 
+  | 'Networking' 
+  | 'Gaming' 
+  | 'Smartphones';

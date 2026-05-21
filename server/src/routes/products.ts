@@ -3,87 +3,11 @@ import type { Request, Response } from 'express'
 import Product from '../models/Product.js';
 import { generateEmbedding } from '../services/embedding.service.js';
 import { generateRecommendation, generateStandaloneQuery } from '../services/ai.service.js';
-import { z } from 'zod';
 import { Chat } from '../models/Chat.js';
 import { addMessageToChat } from '../services/chat.service.js';
 import User from '../models/User.js'
 
 const router = Router();
-
-// create product
-router.post('/', async (req: Request, res: Response) => {
-    try {
-        const { name, specs, price } = req.body;
-
-        const textToEmbed = `${name} ${JSON.stringify(specs)}`;
-
-        const vectorEmbedding = await generateEmbedding(textToEmbed);
-
-        const newProduct = new Product({
-            name,
-            specs,
-            price,
-            vectorEmbedding
-        });
-
-        await newProduct.save();
-        res.status(201).json({ message: "Товар успішно створено", product: newProduct });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Помилка при створенні товару" });
-    }
-});
-
-// bulk create products
-router.post('/bulk', async (req: Request, res: Response) => {
-    try {
-        const productsData = req.body; 
-
-        if (!Array.isArray(productsData)) {
-            return res.status(400).json({ error: "Очікується масив товарів" });
-        }
-
-        const productsToSave = await Promise.all(
-            productsData.map(async (item) => {
-                const { name, brand, category, description, price, image, specs, discount } = item;
-
-                const textToEmbed = `
-                    Товар: ${brand} ${name}
-                    Категорія: ${category}
-                    Опис: ${description}
-                    Характеристики: ${JSON.stringify(specs)}
-                `.trim();
-                
-                const vectorEmbedding = await generateEmbedding(textToEmbed);
-
-                return {
-                    name,
-                    brand,
-                    category,
-                    description,
-                    price,
-                    image,
-                    specs,
-                    discount: discount || 0,
-                    inStock: true, 
-                    vectorEmbedding
-                };
-            })
-        );
-
-        const createdProducts = await Product.insertMany(productsToSave);
-
-        res.status(201).json({ 
-            message: `Успішно додано ${createdProducts.length} товарів з категоріями та зображеннями`, 
-            count: createdProducts.length 
-        });
-
-    } catch (error) {
-        console.error("Bulk create error:", error);
-        res.status(500).json({ error: "Помилка при масовому створенні товарів" });
-    }
-});
 
 // search for products with ai
 router.post('/ai-search', async (req: Request, res: Response) => {
@@ -92,7 +16,6 @@ router.post('/ai-search', async (req: Request, res: Response) => {
         const { query, userId, guestId } = req.body;
         let effectiveUserId = userId;
 
-        // 1. Робота з гостем
         if (!effectiveUserId && guestId) {
             let guest = await User.findOne({ guestId });
             if (!guest) {
@@ -104,11 +27,9 @@ router.post('/ai-search', async (req: Request, res: Response) => {
 
         if (!effectiveUserId) return res.status(400).json({ error: "Ідентифікатор обов'язковий" });
 
-        // 2. Отримання історії
         const chat = await Chat.findOne({ userId: effectiveUserId }); 
         const history = chat ? chat.messages.slice(-6) : [];
 
-        // 3. AI Обробка запиту
         const aiData = await generateStandaloneQuery(query, history);
 
         if (aiData.isGibberish) {
@@ -118,78 +39,65 @@ router.post('/ai-search', async (req: Request, res: Response) => {
             return res.json({ answer: fallbackMsg, products: [] });
         }
 
-        // 4. Формування вбудованого мета-фільтра (Варіант 1 з $match для безпеки та гнучкості)
-        const matchStage: any = {};
+        const vectorFilter: any = {};
 
-        if (aiData.preferredCategory) {
-            matchStage.category = aiData.preferredCategory;
-        } else if (aiData.excludeCategory) {
-            matchStage.category = { $ne: aiData.excludeCategory };
-        }
+        if (aiData.preferredCategory) vectorFilter.category = aiData.preferredCategory;
+        else if (aiData.excludeCategory) vectorFilter.category = { $ne: aiData.excludeCategory };
 
-        if (aiData.brand) {
-            matchStage.brand = { $regex: new RegExp(`^${aiData.brand}$`, 'i') };
-        }
+        if (aiData.minRating) vectorFilter.rating = { $gte: aiData.minRating };
+        if (aiData.brand) vectorFilter.brand = { $regex: new RegExp(`^${aiData.brand}$`, 'i') };
+        if (aiData.maxPrice) vectorFilter.price = { $lte: aiData.maxPrice };
+        if (aiData.onlyWithDiscounts) vectorFilter.discount = { $gt: 0 };
 
-        if (aiData.maxPrice) {
-            matchStage.price = { $lte: aiData.maxPrice };
-        }
+        const pipeline: any[] = [];
+        const queryVector = await generateEmbedding(aiData.searchQuery || "топ товарів");
 
-        if (aiData.onlyWithDiscounts) {
-            matchStage.discount = { $gt: 0 };
-        }
-
-        // 5. Побудова конвеєру агрегації з ЛІМІТОМ ТОП-4
-        const queryVector = await generateEmbedding(aiData.searchQuery);
-        
-        const pipeline: any[] = [
-            { 
-                $vectorSearch: { 
-                    index: "vector_index", 
-                    path: "vectorEmbedding", 
-                    queryVector, 
-                    numCandidates: 50, 
-                    limit: 4 
-                } 
-            }
-        ];
-
-        if (Object.keys(matchStage).length > 0) {
-            pipeline.push({ $match: matchStage });
-        }
+        pipeline.push({ 
+            $vectorSearch: { 
+                index: "vector_index", 
+                path: "vectorEmbedding", 
+                queryVector, 
+                numCandidates: 100, 
+                limit: 8,
+                filter: vectorFilter 
+            } 
+        });
 
         pipeline.push({ 
             $project: { 
                 name: 1, price: 1, brand: 1, category: 1, 
                 description: 1, image: 1, discount: 1, specs: 1,
+                rating: 1,
                 score: { $meta: "vectorSearchScore" } 
             } 
         });
 
-        // Виконуємо пошук
         const searchResults = await Product.aggregate(pipeline);
-        console.log(`[AI Search] Знайдено товарів після фільтрації базою: ${searchResults.length}`);
+        console.log(`[AI Search] Знайдено товарів: ${searchResults.length}`);
 
-        // 6. Генерація текстової рекомендації
-        const answer = await generateRecommendation(query, searchResults, history);
-        
-        // КРОК 3: Пост-фільтрація карток. Залишаємо суто те, що бот РЕАЛЬНО згадав у тексті відповіді
-        const finalMatchedProducts = searchResults.filter(product => {
-            const nameInAnswer = answer.toLowerCase().includes(product.name.toLowerCase());
-            const brandInAnswer = answer.toLowerCase().includes(product.brand.toLowerCase());
-            return nameInAnswer || brandInAnswer;
-        });
+        const rankedProducts = searchResults.map(product => {
+            let weight = product.score || 0; 
+            
+            if (aiData.brand && product.brand.toLowerCase() === aiData.brand.toLowerCase()) {
+                weight += 0.2;
+            }
+            
+            if (aiData.onlyWithDiscounts && product.discount > 0) {
+                weight += 0.1;
+            }
 
-        const isNotFound = finalMatchedProducts.length === 0 || answer.toLowerCase().includes('я не можу знайти');
-        const finalProducts = isNotFound ? [] : finalMatchedProducts;
+            return { ...product, weight };
+        }).sort((a, b) => b.weight - a.weight); 
 
-        // 7. Збереження історії в БД
+        const finalProducts = rankedProducts.slice(0, 4);
+
+        const answer = await generateRecommendation(query, finalProducts, history);
+
         await addMessageToChat(effectiveUserId, 'user', query);
         await addMessageToChat(effectiveUserId, 'assistant', answer, finalProducts);
 
         console.log(`Search took: ${Date.now() - start}ms`);
 
-        // 8. Відповідь клієнту
         return res.json({ 
             answer, 
             products: finalProducts 
@@ -203,46 +111,73 @@ router.post('/ai-search', async (req: Request, res: Response) => {
     }
 });
 
-// get all products
 router.get('/', async (req: Request, res: Response) => {
     try {
-        const products = await Product.find({}).select('-vectorEmbedding');
+        const { cat, search, sort, limit } = req.query;
+        let query: any = {};
 
-        if (!products || products.length === 0) {
-            return res.status(404).json({ message: "Товари не знайдені" });
+        if (cat && cat !== 'All') {
+            query.category = cat;
         }
 
+        if (search && typeof search === 'string') {
+            const escapedQuery = search.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            query.$or = [
+                { name: { $regex: escapedQuery, $options: 'i' } },
+                { brand: { $regex: escapedQuery, $options: 'i' } }
+            ];
+        }
+
+        let sortQuery: any = {};
+        if (sort === 'popular') {
+            sortQuery = { rating: -1, numReviews: -1 };
+        } else if (sort === 'newest') {
+            sortQuery = { createdAt: -1 };
+        }
+
+        const limitNum = limit ? parseInt(limit as string) : 0;
+
+        const products = await Product.find(query)
+            .sort(sortQuery)
+            .limit(limitNum)
+            .select('-vectorEmbedding');
+            
         res.json(products);
     } catch (error) {
-        console.error("Помилка при отриманні товарів:", error);
+        console.error("Помилка:", error);
         res.status(500).json({ error: "Внутрішня помилка сервера" });
     }
 });
 
-// search by query
-router.get('/standart-search', async (req: Request, res: Response) => {
+// get similar products
+router.get('/:id/similar', async (req: Request, res: Response) => {
     try {
-        const query = req.query.q;
-
-        if (!query || typeof query !== 'string' || !query.trim()) {
-            return res.status(200).json([]);
+        const productId = req.params.id;
+        
+        const currentProduct = await Product.findById(productId);
+        if (!currentProduct || !currentProduct.vectorEmbedding) {
+            return res.status(404).json({ message: "Товар або його вектори не знайдені" });
         }
 
-        const searchStr = query.trim();
-        const escapedQuery = searchStr.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const similarProducts = await Product.aggregate([
+            {
+                $vectorSearch: {
+                    index: "vector_index", 
+                    path: "vectorEmbedding",
+                    queryVector: currentProduct.vectorEmbedding,
+                    numCandidates: 50,
+                    limit: 9
+                }
+            },
+            { $match: { _id: { $ne: currentProduct._id } } }, 
+            { $limit: 8 },
+            { $project: { vectorEmbedding: 0 } }
+        ]);
 
-        const products = await Product.find({
-            $or: [
-                { name: { $regex: escapedQuery, $options: 'i' } },
-                { brand: { $regex: escapedQuery, $options: 'i' } } 
-            ]
-        });
-        
-        return res.status(200).json(products);
-
-    } catch (error: any) {
-        console.error('Search error:', error.message);
-        return res.status(500).json({ message: "Внутрішня помилка сервера" });
+        res.json(similarProducts);
+    } catch (error) {
+        console.error("Similar products error:", error);
+        res.status(500).json({ error: "Помилка при пошуку схожих товарів" });
     }
 });
 
@@ -256,8 +191,6 @@ router.get('/:id', async (req: Request, res: Response) => {
         res.status(500).json({ error: "Помилка сервера" });
     }
 });
-
-
 
 
 export default router;

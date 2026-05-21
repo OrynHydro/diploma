@@ -116,6 +116,17 @@ $text-dim: #a1a1aa;
   cursor: pointer;
   transition: all 0.2s;
 
+  &.disabled {
+    background-color: #e4e4e7;
+    color: #a1a1aa;
+    cursor: not-allowed;
+    
+    &:hover {
+      background-color: #e4e4e7;
+      transform: none;
+    }
+  }
+
   &:hover {
     background: $brand-blue;
   }
@@ -661,4 +672,18 @@ $text-dim: #a1a1aa;
     padding-top: 10px;
     border-top: 1px solid #f9fafb;
   }
+}
+
+.stockStatus {
+  margin-top: 5px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.inStock {
+  color: $brand-green;
+}
+
+.outOfStock {
+  color: #ef4444;
 }

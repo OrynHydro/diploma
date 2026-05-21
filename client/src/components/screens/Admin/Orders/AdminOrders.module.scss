@@ -1,0 +1,95 @@
+.wrapper {
+  padding: 32px;
+  background-color: #f8fafc;
+  min-height: 100vh;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 24px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+
+  thead {
+    background: #f1f5f9;
+    th {
+      padding: 16px;
+      text-align: left;
+      font-size: 13px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+
+  tbody {
+    tr {
+      transition: background 0.2s;
+      &:hover { background: #fdfdfd; }
+    }
+    td {
+      padding: 16px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #334155;
+      font-size: 14px;
+    }
+  }
+}
+
+.itemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.itemRow {
+  font-size: 13px;
+  color: #475569;
+}
+
+.itemCount {
+  font-weight: 600;
+  color: #0f172a;
+  background: #e2e8f0;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.statusSelect {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  cursor: pointer;
+  font-weight: 500;
+  color: #1e293b;
+  outline: none;
+  transition: border-color 0.2s;
+
+  &:focus { border-color: #3b82f6; }
+}
+
+.skeletonRow {
+  height: 50px;
+  background: #f1f5f9;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}

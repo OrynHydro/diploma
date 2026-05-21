@@ -5,7 +5,6 @@ $brand-green: #28a745;
   background: #fff;
   border-radius: 16px;
   overflow: hidden;
-  // Змінюємо тінь на більш "прозору" та додаємо рамку
   border: 1px solid #f0f0f0; 
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); 
   
@@ -16,8 +15,8 @@ $brand-green: #28a745;
   position: relative;
 
   &:hover {
-    transform: translateY(-4px); // Трохи менший підйом
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); // Тінь стає глибшою тільки при наведенні
+    transform: translateY(-4px); 
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); 
     border-color: #e5e7eb;
   }
 }

@@ -6,23 +6,25 @@ interface UserInitialState {
     user: IUser | null
     isAuth: boolean
     isLoading: boolean
+    isAdmin: boolean
 }
 
 const initialState: UserInitialState = {
     user: null,
     isAuth: false,
     isLoading: true, 
+    isAdmin: false,
 }
 
 export const userSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {
-        // Установка пользователя (и гостя, и обычного)
         setUser: (state, action: PayloadAction<IUser | null>) => {
             state.user = action.payload
             state.isAuth = !!action.payload && !action.payload.isGuest
             state.isLoading = false
+            state.isAdmin = action.payload?.role === 'admin'
         },
         
         setLoading: (state, action: PayloadAction<boolean>) => {
@@ -33,6 +35,7 @@ export const userSlice = createSlice({
             state.user = null
             state.isAuth = false
             state.isLoading = false
+            state.isAdmin = false
         }
     },
 })

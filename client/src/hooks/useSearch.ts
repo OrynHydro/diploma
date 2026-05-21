@@ -16,11 +16,10 @@ export const useSearch = () => {
         return () => clearTimeout(handler)
     }, [searchTerm])
 
-    // Функція для зміни тексту, яку ми віддамо в Header.tsx
     const handleInputChange = (value: string) => {
         setSearchTerm(value)
         if (!value.trim()) {
-            setDebouncedTerm('') // Абсолютно легальний setState в події кліку/введення!
+            setDebouncedTerm('')
         }
     }
 
@@ -34,14 +33,11 @@ export const useSearch = () => {
         refetchOnWindowFocus: false 
     })
 
-    // Визначаємо, чи крутити лоадер
     const isSearching = searchTerm.trim() !== debouncedTerm.trim() || isPending
 
     return {
         searchTerm,
         setSearchTerm: handleInputChange,
-        // Якщо користувач очистив інпут, ми миттєво віддаємо порожній масив на фронт,
-        // не чекаючи, поки відпрацює дебаунс в ефекті
         results: searchTerm.trim() ? results : [], 
         isPending: searchTerm.trim() ? isSearching : false
     }

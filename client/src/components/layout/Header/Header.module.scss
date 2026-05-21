@@ -368,3 +368,11 @@ $border-color: #f3f4f6;
   font-size: 14px;
   color: #6b7280;
 }
+
+.adminBtn {
+  color: #7c3aed; 
+  &:hover {
+    background: #f5f3ff;
+    color: #6d28d9;
+  }
+}

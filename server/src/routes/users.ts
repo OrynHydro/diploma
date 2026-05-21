@@ -40,8 +40,12 @@ router.post('/', async (req: Request, res: Response) => {
             dbUser = await user.save();
         }
 
-        const accessToken = jwt.sign({ userId: dbUser._id }, secretKeyAccess, { expiresIn: '1h' });
-        const refreshToken = jwt.sign({ userId: dbUser._id }, secretKeyRefresh, { expiresIn: '14d' });
+        const accessToken = jwt.sign(
+            { userId: dbUser._id, role: dbUser.role }, 
+            secretKeyAccess, 
+            { expiresIn: '1h' }
+        );
+        const refreshToken = jwt.sign({ userId: dbUser._id, role: dbUser.role }, secretKeyRefresh, { expiresIn: '14d' });
 
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
@@ -84,8 +88,12 @@ router.post('/login', async (req: Request, res: Response) => {
             return res.status(401).json({ message: "Неправильний телефон або пароль" });
         }
 
-        const accessToken = jwt.sign({ userId: user._id }, secretKeyAccess, { expiresIn: '1h' });
-        const refreshToken = jwt.sign({ userId: user._id }, secretKeyRefresh, { expiresIn: '14d' });
+        const accessToken = jwt.sign(
+            { userId: user._id, role: user.role }, 
+            secretKeyAccess, 
+            { expiresIn: '1h' }
+        );
+        const refreshToken = jwt.sign({ userId: user._id, role: user.role }, secretKeyRefresh, { expiresIn: '14d' });
 
         res.cookie('accessToken', accessToken, {
             httpOnly: true,

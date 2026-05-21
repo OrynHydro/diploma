@@ -1,0 +1,54 @@
+.footer {
+  background: #2563eb;
+  color: #fff;
+  padding: 60px 0 20px;
+  margin-top: auto;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  h3, h4 { margin: 0 0 8px 0; color: #fff; font-size: 1.1rem; }
+  p { color: #dbeafe; margin: 0; font-size: 0.9rem; }
+}
+
+.nav {
+  display: grid;
+  // Створюємо 2 колонки, кожна по 50% ширини, автоматично 3 рядки для 6 посилань
+  grid-template-columns: 1fr 1fr; 
+  gap: 8px 20px; // 8px між рядками, 20px між колонками
+  width: fit-content; // Щоб блок не розтягувався на всю ширину секції
+}
+
+.navLink {
+  color: #dbeafe;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 400;
+  transition: 0.2s;
+  
+  &:hover {
+    color: #fff;
+    text-decoration: underline;
+  }
+}
+
+.bottom {
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #3b82f6; // Легка лінія
+  color: #bfdbfe;
+  font-size: 0.8rem;
+}

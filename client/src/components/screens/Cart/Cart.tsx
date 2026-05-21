@@ -6,7 +6,6 @@ import { useCart } from '@/hooks/useCart'
 import { useActions } from '@/hooks/useActions'
 import s from './Cart.module.scss'
 import CartItem from '@/components/ui/CartItem/CartItem'
-import { useRouter } from 'next/navigation'
 
 const CartPage: FC = () => {
     const { items } = useCart()
@@ -15,7 +14,6 @@ const CartPage: FC = () => {
 
     const total = items.reduce((acc, item) => acc + item.price * item.count, 0)
 
-    const router = useRouter()
 
     if (items.length === 0) {
         return (
@@ -32,7 +30,6 @@ const CartPage: FC = () => {
 
     const handleClearAll = () => {
         setIsClearing(true)
-        // Чекаємо поки всі анімовані елементи "вилетять"
         setTimeout(() => {
             clearCart()
             setIsClearing(false)

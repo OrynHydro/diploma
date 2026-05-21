@@ -12,8 +12,13 @@ import chatsRouter from './routes/chats.js'
 import smsRouter from './routes/sms.js'
 import reviewRouter from './routes/review.js'
 import orderRouter from './routes/orders.js'
+import adminRouter from './routes/admin.js'
 
 import { MongoConnect } from './config/mongo-connect.js'
+import path from 'path';
+import multer from 'multer';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
 
 const app: Application = express()
 
@@ -27,12 +32,18 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 app.use('/users', usersRouter)
 app.use('/products', productsRouter)
 app.use('/chats', chatsRouter)
 app.use('/sms', smsRouter)
 app.use('/reviews', reviewRouter)
 app.use('/orders', orderRouter)
+app.use('/admin', adminRouter)
+
 
 MongoConnect()
 

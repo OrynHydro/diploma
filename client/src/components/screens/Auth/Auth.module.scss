@@ -94,7 +94,6 @@ $border-color: #e2e8f0;
     box-shadow: 0 0 0 4px color.adjust($accent, $alpha: -0.9);
   }
 
-  // Стан помилки
   &.inputError {
     border-color: $error-red;
     background-color: color.adjust($error-red, $alpha: -0.98);

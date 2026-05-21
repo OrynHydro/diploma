@@ -100,7 +100,6 @@ const CataloguePage: FC = () => {
         return result;
     }, [searchedAndCategoryProducts, minPrice, maxPrice, selectedBrands, selectedSpecs, sortBy]);
 
-    // Хендлери
     const handleBrandChange = (brand: string) => {
         setSelectedBrands(prev => prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]);
     };

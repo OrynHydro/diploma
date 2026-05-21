@@ -42,7 +42,7 @@ const OrderSchema: Schema = new mongoose.Schema<IOrderDocument>(
 
         status: {
             type: String,
-            enum: ['Pending', 'Paid', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+            enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
             default: 'Pending'
         }
     },

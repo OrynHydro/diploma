@@ -8,6 +8,10 @@
 node_modules/
 .env
 
+client/public/uploads/*
+
+!client/public/uploads/.gitkeep
+
 # testing
 /coverage
 

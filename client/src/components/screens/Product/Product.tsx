@@ -115,6 +115,7 @@ const ProductPage = () => {
         const fetchSimilar = async () => {
             try {
                 setSimilarLoading(true);
+                console.log(productId)
                 const { data } = await api.get(`/products/${productId}/similar`);
                 setSimilarProducts(data);
             } catch (error) {
@@ -253,15 +254,24 @@ const ProductPage = () => {
                                 </span>
                             )}
                         </div>
+
+                        <div className={s.stockStatus}>
+                            {product.inStock ? (
+                                <span className={s.inStock}>● В наявності</span>
+                            ) : (
+                                <span className={s.outOfStock}>○ Немає в наявності</span>
+                            )}
+                        </div>
                     </div>
 
                     <p className={s.description}>{product.description}</p>
 
                     <button 
-                        className={`${s.buyBtn} ${isAdded ? s.added : ''}`} 
+                        className={`${s.buyBtn} ${isAdded ? s.added : ''} ${!product.inStock ? s.disabled : ''}`} 
                         onClick={handleAddToCart}
+                        disabled={!product.inStock}
                     >
-                        {isAdded ? 'Додано у кошик!' : 'У кошик'}
+                        {!product.inStock ? 'Немає в наявності' : (isAdded ? 'Додано у кошик!' : 'У кошик')}
                     </button>
 
                     <div className={s.specsBlock}>

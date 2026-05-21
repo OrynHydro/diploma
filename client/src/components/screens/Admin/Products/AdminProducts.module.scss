@@ -1,0 +1,95 @@
+.wrapper { padding: 20px; }
+
+.searchInput {
+  padding: 10px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  width: 300px;
+  outline: none;
+  font-size: 14px;
+  
+  &:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.titleGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px; 
+}
+
+.countBadge {
+  background: #e2e8f0; 
+  color: #475569;   
+  padding: 4px 10px;
+  border-radius: 20px; 
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+
+  th, td { padding: 15px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+}
+
+.image { object-fit: contain; border-radius: 6px; }
+
+.actions { display: flex; gap: 10px; }
+
+.editBtn, .deleteBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.editBtn:hover { background: #e0f2fe; color: #0284c7; }
+.deleteBtn:hover { background: #fee2e2; color: #dc2626; }
+
+.addButton {
+  display: flex; align-items: center; gap: 8px;
+  background: #0f172a; color: white;
+  padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.skeletonWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeletonRow {
+  height: 90px; // Висота рядка з урахуванням картинки
+  background: #f1f5f9;
+  border-radius: 8px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}

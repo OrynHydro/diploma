@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ShoppingCart, User, Search, Laptop, LogIn, Loader2, X } from 'lucide-react';
+import { ShoppingCart, User, Search, Laptop, LogIn, Loader2, X, ShieldCheck } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth'; 
 import { useCart } from '@/hooks/useCart';
 import { useSearch } from '@/hooks/useSearch'; 
@@ -14,7 +14,7 @@ import { IProduct } from '@shared/interfaces/product.interface';
 const Header: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
-  const { isAuth } = useAuth(); 
+  const { isAuth, isAdmin } = useAuth(); 
   const { items } = useCart();
   
   const { searchTerm, setSearchTerm, results, isPending } = useSearch();
@@ -162,6 +162,12 @@ const Header: React.FC = () => {
             </div>
 
             <div className={s.buttonGroup}>
+              {isAdmin && (
+                <Link href="/admin" className={`${s.iconBtn} ${s.adminBtn}`} title="Панель адміністратора">
+                  <ShieldCheck size={24} /> 
+                </Link>
+              )}
+
               <Link href="/cart" className={s.iconBtn}>
                 <ShoppingCart size={24} />
                 <span className={s.badge}>{items.length}</span>
